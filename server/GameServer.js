@@ -20,8 +20,11 @@ function GameServer(port) {
     this.startTime = (new Date()).getTime()
     this.clients = [];
 
+    this.tick = 0;
+
     // gameserver config
     this.config = {
+        tickrate: 30, // ticks per second
         max_players: 30
     }
 }
@@ -76,6 +79,18 @@ GameServer.prototype.start = function() {
 
         this.clients.push(client);
     }
+
+    // start game loop
+    setInterval(function() {
+        this.loop();
+    }.bind(this), 1000 / this.config.tickrate);
+
+    this.log(LogType.INFO, "Simulating at " + this.config.tickrate + " ticks per second");
+}
+
+GameServer.prototype.loop = function() {
+    // doing stuff
+    var x = Math.sqrt(1337);
 }
 
 /**
