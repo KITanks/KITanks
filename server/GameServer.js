@@ -123,6 +123,10 @@ GameServer.prototype.loop = function() {
             this.kickClient(cl);
             this.removeClient(id);
         }
+
+        this.clients.forEach(function(other) {
+            other.send(cl.handler.getPacket02());
+        });
     }.bind(this));
 }
 
