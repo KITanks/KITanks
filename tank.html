@@ -7,19 +7,15 @@
       }
     </style>
     <body onload = "startGame()">
+
       <script>
-
         var tank;
-
         function startGame() {
           myGameArea.start();
           tank = new tank(20, 20, "blue", 50, 50, 0);
         }
-
         function gameLoop() {
-
         }
-
         var myGameArea = {
           canvas : document.createElement("canvas");
           start : function() {
@@ -31,14 +27,12 @@
           },
           clear : function() {
             this.context.clearrect(0,0, this.convas.width, this.canvas.height);
-          }
+          };
         }
-
         function uptdateGameArea() {
           myGameArea.clear();
           myGameArea.update();
         }
-
         function tank(width, heigth, color, x, y, rotation) {
           this.width = width;
           this.height = height;
@@ -49,30 +43,38 @@
           ctx = myGameArea.context;
           ctx.fillStyle = color;
           czx.fillRect(this.x, this.y, this.width, this.height);
+          this.newPos = function() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          }
         }
 
+     function updateGameArea() {
+       myGameArea.clear();
+       myGamePiece.newPos();
+       myGamePiece.update();
+            }
         function moveFoward() {
           this.speed = 1;
-        }
+          if(keysDown[K_W]){
+            this.changeXby(2);
+          }
+          // moves forward
 
+        }
         function moveBackward() {
-          this.speed = 1
+          this.speed = -1
         }
-
         function rotatteLeft() {
           this.rotation += 5;
         }
-
         function rotateRight() {
           this.rotation -= 5;
         }
-
         function bullet() {
-
         }
-
-
     </script>
+
     <P>dis is da best tank gaem</p>
   </body>
 </html>
