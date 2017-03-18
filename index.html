@@ -20,7 +20,7 @@
 
     }
 
-    var gameArea = {
+    var myGameArea = {
       canvas : document.createElement("canvas");
       start : function() {
         this.canvas.width = 600;
@@ -35,7 +35,8 @@
     }
 
     function uptdateGameArea() {
-
+      myGameArea.clear();
+      myGameArea.update();
     }
 
     function tank() {
@@ -43,7 +44,7 @@
       this.height = height;
       this.x = x;
       this.y = y;
-      ctx = gameArea.context;
+      ctx = myGameArea.context;
       ctx.fillStyle = color;
       czx.fillRect(this.x, this.y, this.width, this.height);
     }
