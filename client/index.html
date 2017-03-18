@@ -1,65 +1,76 @@
 <!DOCTYPE html>
 <html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <style>
       canvas {
         border:1px solid #d3d3d3;
         background-color: #f1f1f1;
       }
     </style>
-    <body onload = "startGame()">
+  </head>
+    <body onload="startGame()">
       <script>
 
-        var tank;
+        var myGamePiece;
 
         function startGame() {
+          myGamePiece = new tank(20, 20, "blue",100 , 100, 4, 3);
           myGameArea.start();
-          tank = new tank(20, 20, "blue", 50, 50,1 , 1, 1);
         }
 
         var myGameArea = {
-          canvas : document.createElement("canvas");
+          canvas : document.createElement("canvas"),
           start : function() {
-            this.canvas.width = 800;
-            this.canvas.height = 800;
-            this.context = this.canvas.getContext("2d");
-            document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-            this.frameNo = 0;
-            this.interval = setInterval(updateGameArea, 20);
-            window.addEventListener('keydown', function (e) {
-            e.preventDefault();
-            myGameArea.keys = (myGameArea.keys || []);
-            myGameArea.keys[e.keyCode] = (e.type == "keydown");
-          })
-          window.addEventListener('keyup', function (e) {
-            myGameArea.keys[e.keyCode] = (e.type == "keydown");
-          })
-        },
-        stop : function() {
-          clearInterval(this.interval);
-        }
-        clear : function() {
-          this.context.clearrect(0,0, this.convas.width, this.canvas.height);
-        },
-      }
-
-
-        function uptdateGameArea() {
-          if (tank = BOOOOOM) {
-            myGameArea.stop();
-          } else {
-            myGameArea.clear();
-            myGamePiece.moveAngle = 0;
-            myGamePiece.speed = 0;
-            if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.rotateRight();}
-            if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.rotateLeft(); }
-            if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.moveFoward();}
-            if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.moveBackward();; }
-            myGamePiece.newPos();
-            myGameArea.update();
-          }
+              this.canvas.width = 400;
+              this.canvas.height = 400;
+              this.context = this.canvas.getContext("2d");
+              document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+              this.frameNo = 0;
+              this.interval = setInterval(updateGameArea, 20);
+              window.addEventListener('keydown', function (e) {
+                e.preventDefault();
+                myGameArea.keys = (myGameArea.keys || []);
+                myGameArea.keys[e.keyCode] = (e.type == "keydown");
+              })
+              window.addEventListener('keyup', function (e) {
+                myGameArea.keys[e.keyCode] = (e.type == "keydown");
+              })
+            },
+            stop : function() {
+              clearInterval(this.interval);
+            },
+            clear : function() {
+              this.context.clearRect(0,0, this.canvas.width, this.canvas.height);
+            }
         }
 
-        function tank(width, heigth, color, x, y, topSpeed, topRotSpeed) {
+        function updateGameArea() {
+          myGameArea.clear();
+          myGamePiece.moveAngle = 0;
+          myGamePiece.speed = 0;
+          if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.rotateRight();}
+          if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.rotateLeft(); }
+          if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.moveForward();}
+          if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.moveBackward();; }
+          myGamePiece.newPos();
+          myGamePiece.update();
+          /*if (myGamePiece = BOOOOOM) {
+          myGameArea.stop();
+        } else {
+        myGameArea.clear();
+        myGamePiece.moveAngle = 0;
+        myGamePiece.speed = 0;
+        if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.rotateRight();}
+        if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.rotateLeft(); }
+        if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.moveFoward();}
+        if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.moveBackward();; }
+        myGamePiece.newPos();
+        myGameArea.update();
+      }*/
+        }
+
+        function tank(width, height, color, x, y, topSpeed, topRotSpeed) {
           this.width = width;
           this.height = height;
           this.x = x;
@@ -83,23 +94,23 @@
             this.x += this.speed * Math.sin(this.angle);
             this.y -= this.speed * Math.cos(this.angle);
           }
+          this.moveForward = function() {
+            this.speed = this.topSpeed;
+          }
+
+          this.moveBackward = function() {
+            this.speed = -this.topSpeed
+          }
+
+          this.rotateLeft = function() {
+            this.moveAngle = this.topRotSpeed;
+          }
+
+          this.rotateRight = function() {
+            this.moveAngle = -this.topRotSpeed;
+          }
         }
 
-        function moveFoward() {
-          this.speed = this.topSpeed;
-        }
-
-        function moveBackward() {
-          this.speed = -this.topSpeed
-        }
-
-        function rotateLeft() {
-          this.moveAngle = this.topRotSpeed;
-        }
-
-        function rotateRight() {
-          this.moveAngle = -this.topRotSpeed;
-        }
 
         function bullet() {
 
@@ -107,6 +118,6 @@
 
 
     </script>
-    <P>dis is da best tank gaem</p>
+    <P>dis is da best myGamePiece gaem</p>
   </body>
 </html>
