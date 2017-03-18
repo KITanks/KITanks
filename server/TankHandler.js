@@ -1,3 +1,5 @@
+var Bullet = require("./Bullet.js");
+
 /**
  * TankHandler, stores data for a tank and parses messages
  *   from client
@@ -21,6 +23,9 @@ function TankHandler(server, client) {
     this.x = -1;
     this.y = -1;
     this.ang = 0;
+
+    // time of last bullet
+    this.lastBulletShot = 0;
 }
 
 module.exports = TankHandler;
@@ -70,16 +75,14 @@ TankHandler.prototype.getLastUpdate = function() {
 /**
  * Returns data for packet 2
  */
-TankHandler.prototype.getPacket02 = function() {
-    var data = {
+TankHandler.prototype.getData = function() {
+    return {
         pckid: 2,
         id: this.id,
         x: this.x,
         y: this.y,
         ang: this.ang
     }
-
-    return JSON.stringify(data);
 }
 
 /**
@@ -117,9 +120,26 @@ TankHandler.prototype.handleMessage = function(data) {
                 break;
             this.setData({x: data.x, y: data.y, ang: data.ang});
             break;
+        case 11:
+            this.spawnBullet();
+            break;
         default:
             break;
     }
+}
+
+TankHandler.prototype.spawnBullet = function() {
+    var now = Date.now();
+
+    if (now - this.lastBulletShot < this.server.config.bullet_interval)
+        return;
+
+    var bullet = new Bullet(this.server.getUniqueBulletId(), this.x, this.y, this.ang);
+    this.server.bullets.push(bullet);
+
+    console.log("added bullet " + bullet.id);
+
+    this.lastBulletShot = now;
 }
 
 /**

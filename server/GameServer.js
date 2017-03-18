@@ -26,11 +26,20 @@ function GameServer(port) {
     // next id to use
     this.tankId = 0;
 
+    // timestamp of last tick
+    this.lastTick = Date.now();
+
+    // bullets
+    this.bullets = [];
+    // next id to use
+    this.bulletId = 0;
+
     // gameserver config
     this.config = {
-        tickrate: 30,    // ticks per second
+        tickrate: 60,    // ticks per second
         max_players: 10, // max players
-        kick_after: 1000
+        kick_after: 1000,
+        bullet_interval: 1000
     }
 }
 
@@ -68,6 +77,7 @@ GameServer.prototype.start = function() {
         // message listener
         client.on("message", function onMessage(message) {
             try {
+                console.log("got message");
                 // parse data and check for player id
                 var data = JSON.parse(message);
                 if (!data.hasOwnProperty("id"))
@@ -114,6 +124,15 @@ GameServer.prototype.start = function() {
  */
 GameServer.prototype.loop = function() {
     var now = Date.now();
+    var dt = now - this.lastTick;
+
+    // update all bullets
+    this.bullets.forEach(function(bullet) {
+        bullet.update(dt);
+    }.bind(this));
+
+    // build data
+    var bulletData = this.getBulletData();
 
     this.clients.forEach(function(cl) {
         // check last update time, kick if no recent response
@@ -123,11 +142,16 @@ GameServer.prototype.loop = function() {
             this.kickClient(cl);
             this.removeClient(id);
         }
-
-        this.clients.forEach(function(other) {
-            other.send(cl.handler.getPacket02());
-        });
     }.bind(this));
+
+    var tankData = this.getTankData();
+
+    this.clients.forEach(function(client) {
+        client.send(tankData);
+        client.send(bulletData);
+    });
+
+    this.lastTick = now;
 }
 
 /**
@@ -165,8 +189,32 @@ GameServer.prototype.log = function(type, message) {
             break;
         default:
         case LogType.INFO:
-            console.log("[INFO] " + message);
+            console.log("[INFO ] " + message);
     }
+}
+
+GameServer.prototype.getBulletData = function() {
+    var bullets = [];
+    this.bullets.forEach(function(bullet) {
+        bullets.push(bullet.getData());
+    }.bind(this));
+
+    return JSON.stringify({
+        pckid: 4,
+        bullets: bullets
+    });
+}
+
+GameServer.prototype.getTankData = function() {
+    var tanks = [];
+    this.clients.forEach(function(client) {
+        tanks.push(client.handler.getData());
+    });
+
+    return JSON.stringify({
+        pckid: 2,
+        tanks: tanks
+    });
 }
 
 /**
@@ -174,6 +222,13 @@ GameServer.prototype.log = function(type, message) {
  */
 GameServer.prototype.getUniqueTankId = function() {
     return this.tankId++;
+}
+
+/**
+ * Returns next unique id and increments it by one
+ */
+GameServer.prototype.getUniqueBulletId = function() {
+    return this.bulletId++;
 }
 
 /**
