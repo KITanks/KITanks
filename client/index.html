@@ -1,32 +1,78 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Tank Game</title>
-    </head>
-    <body>
-        <script type="text/javascript">
-        var socket = new WebSocket("wss://echo.websocket.org");
+    <style>
+      canvas {
+        border:1px solid #d3d3d3;
+        background-color: #f1f1f1;
+      }
+    </style>
+    <body onload = "startGame()">
+      <script>
 
-        socket.onopen = function() {
-            console.log("connection opened");
+        var tank;
 
-            setTimeout(function() {
-                console.log("sending message...");
-                socket.send("hi i am a client");
-            }, 3000);
+        function startGame() {
+          myGameArea.start();
+          tank = new tank(20, 20, "blue", 50, 50, 0);
         }
 
-        socket.onmessage = function(message) {
-            console.log("message: " + message);
+        function gameLoop() {
+
         }
 
-        socket.onclose = function() {
-            console.log("connection closed");
+        var myGameArea = {
+          canvas : document.createElement("canvas");
+          start : function() {
+            this.canvas.width = 600;
+            this.canvas.height = 600;
+            this.context = this.canvas.getContext("2d");
+            document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+            this.interval = setInterval(updateGameArea, 20);
+          },
+          clear : function() {
+            this.context.clearrect(0,0, this.convas.width, this.canvas.height);
+          }
         }
 
-        socket.onerror = function(error) {
-            console.log("error: " + error);
+        function uptdateGameArea() {
+          myGameArea.clear();
+          myGameArea.update();
         }
-        </script>
-    </body>
+
+        function tank(width, heigth, color, x, y, rotation) {
+          this.width = width;
+          this.height = height;
+          this.x = x;
+          this.y = y;
+          this.speed = 0;
+          this.rotation = rotation;
+          ctx = myGameArea.context;
+          ctx.fillStyle = color;
+          czx.fillRect(this.x, this.y, this.width, this.height);
+        }
+
+        function moveFoward() {
+          this.speed = 1;
+        }
+
+        function moveBackward() {
+          this.speed = 1
+        }
+
+        function rotatteLeft() {
+          this.rotation += 5;
+        }
+
+        function rotateRight() {
+          this.rotation -= 5;
+        }
+
+        function bullet() {
+
+        }
+
+
+    </script>
+    <P>dis is da best tank gaem</p>
+  </body>
 </html>

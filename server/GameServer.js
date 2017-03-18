@@ -1,6 +1,15 @@
 var WebSocketServer = require('ws').Server;
 
 /**
+ * Logging types for log function
+ */
+var LogType = {
+    INFO:  1,
+    ERROR: 2,
+    DEBUG: 3
+}
+
+/**
  * GameServer instance, kind of serves as a 'constructor'
  * 
  * @param {number} port - WebSocket server port
@@ -24,7 +33,7 @@ module.exports = GameServer;
  */
 GameServer.prototype.start = function() {
     this.server = new WebSocketServer({port: this.port}, function() {
-        console.log("Started server on :" + this.port + "...");
+        this.log(LogType.INFO, "Server listening on port :" + this.port);
 
         // init some stuff
     }.bind(this));
@@ -33,26 +42,27 @@ GameServer.prototype.start = function() {
     this.server.on("connection", onConnection.bind(this));
 
     function onClose() {
-        console.log("DEBUG: connection closed");
+        this.log(LogType.INFO, "A client lost connection");
 
         // remove player from clients array?
     }
 
     function onConnection(client) {
+        // check for max player count
         if (this.clients.length >= this.config.max_players) {
-            console.log("Server exceeded max players, kicking client...");            
+            this.log(LogType.INFO, "Server exceeds maximum player count, kicking client...");
             client.close();
             return;
         }
 
-        console.log("DEBUG: new client connected");
+        this.log(LogType.INFO, "New connection from " + client.upgradeReq.connection.remoteAddress);
 
         // message listener
         // TODO: auslagern in TankHandler/PlayerHandler
         client.on("message", function onmessage(message) {
-            console.log("DEBUG: received: " + message);
+            this.log(LogType.DEBUG, "Received message '" + message + "'");
             client.send(message);
-        });
+        }.bind(this));
 
         // add server and client to object
         var o_bind = {
@@ -78,4 +88,21 @@ GameServer.prototype.broadcast = function(message) {
         if (client.readyState == WebSocket.OPEN)
             client.send(message);
     })
+}
+
+/**
+ * Displays message in console
+ */
+GameServer.prototype.log = function(type, message) {
+    switch (type) {
+        case LogType.ERROR:
+            console.log("[ERROR] " + message);
+            break;
+        case LogType.DEBUG:
+            console.log("[DEBUG] " + message);
+            break;
+        default:
+        case LogType.INFO:
+            console.log("[INFO ] " + message);
+    }
 }
