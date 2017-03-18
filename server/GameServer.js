@@ -20,7 +20,7 @@ function GameServer(port) {
     this.port = port;
 
     // server start time
-    this.startTime = (new Date()).getTime()
+    this.startTime = Date.now();
     // all clients
     this.clients = [];
     // next id to use
@@ -28,8 +28,9 @@ function GameServer(port) {
 
     // gameserver config
     this.config = {
-        tickrate: 30,   // ticks per second
-        max_players: 10 // max players
+        tickrate: 30,    // ticks per second
+        max_players: 10, // max players
+        kick_after: 1000
     }
 }
 
@@ -58,10 +59,7 @@ GameServer.prototype.start = function() {
         if (this.clients.length >= this.config.max_players) {
             this.log(LogType.ERROR, "Server exceeds maximum player count, kicking client...");
             
-            // send "kick" package
-            client.send(JSON.stringify({pckid: 3}));
-            client.close();
-
+            this.kickClient(client);
             return;
         }
 
@@ -111,9 +109,31 @@ GameServer.prototype.start = function() {
     this.log(LogType.INFO, "Simulating at " + this.config.tickrate + " ticks per second");
 }
 
+/**
+ * Main game loop
+ */
 GameServer.prototype.loop = function() {
-    // doing stuff here
-    var x = Math.sqrt(1337);
+    var now = Date.now();
+
+    this.clients.forEach(function(cl) {
+        // check last update time, kick if no recent response
+        if (now - cl.handler.getLastUpdate() > this.config.kick_after) {
+            var id = cl.handler.getId();
+            // kick and remove from list
+            this.kickClient(cl);
+            this.removeClient(id);
+        }
+    }.bind(this));
+}
+
+/**
+ * Sends the kick packet and closes connection to
+ *   client afterwards
+ */
+GameServer.prototype.kickClient = function(client) {
+    // send "kick" package
+    client.send(JSON.stringify({pckid: 3}));
+    client.close();
 }
 
 /**

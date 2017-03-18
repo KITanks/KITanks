@@ -14,6 +14,9 @@ function TankHandler(server, client) {
     // player id
     this.id = -1;
 
+    // time of last update
+    this.lastUpdate = Date.now();
+
     // coords and rotation
     this.x = -1;
     this.y = -1;
@@ -45,7 +48,7 @@ TankHandler.prototype.setAddress = function(address) {
  */
 TankHandler.prototype.setId = function(id) {
     this.id = id;
-    this.sendPackage01();
+    this.sendPacket01();
 }
 
 /**
@@ -58,6 +61,10 @@ TankHandler.prototype.sendPacket01 = function() {
     }
 
     this.client.send(JSON.stringify(data));
+}
+
+TankHandler.prototype.getLastUpdate = function() {
+    return this.lastUpdate;
 }
 
 /**
@@ -87,6 +94,9 @@ TankHandler.prototype.setData = function(data) {
     this.x = data.x;
     this.y = data.y;
     this.ang = data.ang;
+    
+    // update time
+    this.lastUpdate = Date.now();
 }
 
 /**
@@ -95,7 +105,21 @@ TankHandler.prototype.setData = function(data) {
  * @param {object} data - JSON data
  */
 TankHandler.prototype.handleMessage = function(data) {
-    //
+    if (!data.hasOwnProperty("pckid"))
+        return;
+
+    switch (data.pckid) {
+        // position update
+        case 10:
+            if (!data.hasOwnProperty("x")
+             || !data.hasOwnProperty("y")
+             || !data.hasOwnProperty("ang"))
+                break;
+            this.setData({x: data.x, y: data.y, ang: data.ang});
+            break;
+        default:
+            break;
+    }
 }
 
 /**
