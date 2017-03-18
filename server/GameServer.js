@@ -1,4 +1,5 @@
-var WebSocketServer = require('ws').Server;
+var WebSocketServer = require("ws").Server;
+var TankHandler = require("./TankHandler.js");
 
 /**
  * Logging types for log function
@@ -15,17 +16,20 @@ var LogType = {
  * @param {number} port - WebSocket server port
  */
 function GameServer(port) {
+    // server port
     this.port = port;
 
+    // server start time
     this.startTime = (new Date()).getTime()
+    // all clients
     this.clients = [];
-
-    this.tick = 0;
+    // next id to use
+    this.tankId = 0;
 
     // gameserver config
     this.config = {
-        tickrate: 30, // ticks per second
-        max_players: 30
+        tickrate: 30,   // ticks per second
+        max_players: 10 // max players
     }
 }
 
@@ -37,47 +41,66 @@ module.exports = GameServer;
 GameServer.prototype.start = function() {
     this.server = new WebSocketServer({port: this.port}, function() {
         this.log(LogType.INFO, "Server listening on port :" + this.port);
-
-        // init some stuff
     }.bind(this));
 
     // listener for incoming connections
     this.server.on("connection", onConnection.bind(this));
 
     function onClose() {
-        this.log(LogType.INFO, "A client lost connection");
+        this.self.log(LogType.DEBUG, "Client #" + this.socket.handler.getId() + " lost connection");
 
-        // remove player from clients array?
+        // remove client from array
+        this.self.removeClient(this.socket.handler.getId());
     }
 
     function onConnection(client) {
         // check for max player count
         if (this.clients.length >= this.config.max_players) {
-            this.log(LogType.INFO, "Server exceeds maximum player count, kicking client...");
+            this.log(LogType.ERROR, "Server exceeds maximum player count, kicking client...");
+            
+            // send "kick" package
+            client.send(JSON.stringify({pckid: 3}));
             client.close();
+
             return;
         }
 
-        this.log(LogType.INFO, "New connection from " + client.upgradeReq.connection.remoteAddress);
+        this.log(LogType.DEBUG, "New connection from " + client.upgradeReq.connection.remoteAddress);
 
         // message listener
-        // TODO: auslagern in TankHandler/PlayerHandler
-        client.on("message", function onmessage(message) {
-            this.log(LogType.DEBUG, "Received message '" + message + "'");
-            client.send(message);
+        client.on("message", function onMessage(message) {
+            try {
+                // parse data and check for player id
+                var data = JSON.parse(message);
+                if (!data.hasOwnProperty("id"))
+                    return;
+
+                // get client and call handle function
+                var cl = this.getClientById(client.upgradeReq.connection.remoteAddress, data.id);
+                if (cl != null)
+                    cl.handler.handleMessage(data);
+            } catch(e) { }
         }.bind(this));
 
-        // add server and client to object
         var o_bind = {
-            server: this,
+            self: this,
             socket: client
         };
+
+        // add instance of handler
+        client.handler = new TankHandler(this, client);
+        // set remote address
+        client.handler.setAddress(client.upgradeReq.connection.remoteAddress);
 
         // register error and close listener
         client.on("error", onClose.bind(o_bind));
         client.on("close", onClose.bind(o_bind));
 
         this.clients.push(client);
+
+        // send init package
+        var id = this.getUniqueTankId();
+        client.handler.setId(id);
     }
 
     // start game loop
@@ -89,7 +112,7 @@ GameServer.prototype.start = function() {
 }
 
 GameServer.prototype.loop = function() {
-    // doing stuff
+    // doing stuff here
     var x = Math.sqrt(1337);
 }
 
@@ -102,7 +125,7 @@ GameServer.prototype.broadcast = function(message) {
     this.clients.forEach(function each(client) {
         if (client.readyState == WebSocket.OPEN)
             client.send(message);
-    })
+    });
 }
 
 /**
@@ -118,6 +141,42 @@ GameServer.prototype.log = function(type, message) {
             break;
         default:
         case LogType.INFO:
-            console.log("[INFO ] " + message);
+            console.log("[INFO] " + message);
     }
+}
+
+/**
+ * Returns next unique id and increments it by one
+ */
+GameServer.prototype.getUniqueTankId = function() {
+    return this.tankId++;
+}
+
+/**
+ * Removes client from storage
+ *
+ * @param {number} id - Player id
+ */
+GameServer.prototype.removeClient = function(id) {
+    for (var i = 0; i < this.clients.length; i++) {
+        if (this.clients[i].handler.getId() == id)
+            this.clients.splice(i, 1);
+    }
+}
+
+/**
+ * Returns client with given address and id, null if invalid
+ *
+ * @param {string} address - Remote address
+ * @param {number} id      - Player id
+ */
+GameServer.prototype.getClientById = function(address, id) {
+    for (var i = 0; i < this.clients.length; i++) {
+        var client = this.clients[i];
+        if (client.handler.getId() == id
+         && client.handler.getAddress() == address)
+            return client;
+    }
+
+    return null;
 }
