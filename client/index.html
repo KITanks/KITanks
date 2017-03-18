@@ -13,58 +13,92 @@
 
         function startGame() {
           myGameArea.start();
-          tank = new tank(20, 20, "blue", 50, 50, 0);
-        }
-
-        function gameLoop() {
-
+          tank = new tank(20, 20, "blue", 50, 50,1 , 1, 1);
         }
 
         var myGameArea = {
           canvas : document.createElement("canvas");
           start : function() {
-            this.canvas.width = 600;
-            this.canvas.height = 600;
+            this.canvas.width = 800;
+            this.canvas.height = 800;
             this.context = this.canvas.getContext("2d");
             document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+            this.frameNo = 0;
             this.interval = setInterval(updateGameArea, 20);
-          },
-          clear : function() {
-            this.context.clearrect(0,0, this.convas.width, this.canvas.height);
+            window.addEventListener('keydown', function (e) {
+            e.preventDefault();
+            myGameArea.keys = (myGameArea.keys || []);
+            myGameArea.keys[e.keyCode] = (e.type == "keydown");
+          })
+          window.addEventListener('keyup', function (e) {
+            myGameArea.keys[e.keyCode] = (e.type == "keydown");
+          })
+        },
+        stop : function() {
+          clearInterval(this.interval);
+        }
+        clear : function() {
+          this.context.clearrect(0,0, this.convas.width, this.canvas.height);
+        },
+      }
+
+
+        function uptdateGameArea() {
+          if (tank = BOOOOOM) {
+            myGameArea.stop();
+          } else {
+            myGameArea.clear();
+            myGamePiece.moveAngle = 0;
+            myGamePiece.speed = 0;
+            if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.rotateRight();}
+            if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.rotateLeft(); }
+            if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.moveFoward();}
+            if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.moveBackward();; }
+            myGamePiece.newPos();
+            myGameArea.update();
           }
         }
 
-        function uptdateGameArea() {
-          myGameArea.clear();
-          myGameArea.update();
-        }
-
-        function tank(width, heigth, color, x, y, rotation) {
+        function tank(width, heigth, color, x, y, topSpeed, topRotSpeed) {
           this.width = width;
           this.height = height;
           this.x = x;
           this.y = y;
           this.speed = 0;
-          this.rotation = rotation;
-          ctx = myGameArea.context;
-          ctx.fillStyle = color;
-          czx.fillRect(this.x, this.y, this.width, this.height);
+          this.angle = 0;
+          this.moveAngle = 0;
+          this.topSpeed = topSpeed;
+          this.topRotSpeed = topRotSpeed;
+          this.update = function() {
+            ctx = myGameArea.context;
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle);
+            ctx.fillStyle = color;
+            ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
+            ctx.restore();
+          }
+          this.newPos = function() {
+            this.angle += this.moveAngle * Math.PI / 180;
+            this.x += this.speed * Math.sin(this.angle);
+            this.y -= this.speed * Math.cos(this.angle);
+          }
         }
 
         function moveFoward() {
-          this.speed = 1;
+          this.speed = this.topSpeed;
         }
 
         function moveBackward() {
-          this.speed = 1
+          this.speed = -this.topSpeed
         }
 
-        function rotatteLeft() {
-          this.rotation += 5;
+        function rotateLeft() {
+          this.moveAngle = this.topRotSpeed;
         }
 
         function rotateRight() {
-          this.rotation -= 5;
+          this.moveAngle = -this.topRotSpeed;
         }
 
         function bullet() {
