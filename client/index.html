@@ -15,7 +15,7 @@
         var myGamePiece;
 
         function startGame() {
-          myGamePiece = new tank(20, 20, "green",100 , 100, 4, 3);
+          myGamePiece = new tank(20, 20, "yellow",100 , 100, 4, 3);
           myGameArea.start();
         }
 
@@ -78,18 +78,6 @@
           this.x = x;
           this.y = y;
 
-          if(this.x >= myGameArea.canvas.width) {
-            this.x = myGameArea.canvas.width;
-          }
-          if(this.x <= 0) {
-            this.x = 0;
-          }
-          if(this.y >= myGameArea.canvas.height) {
-            this.y = myGameArea.canvas.height;
-          }
-          if(this.y <= 0) {
-            this.y = 0;
-          }
 
           this.speed = 0;
           this.angle = 0;
@@ -109,6 +97,18 @@
             this.angle += this.moveAngle * Math.PI / 180;
             this.x += this.speed * Math.sin(this.angle);
             this.y -= this.speed * Math.cos(this.angle);
+            if(this.x >= myGameArea.canvas.width) {
+              this.x = myGameArea.canvas.width;
+            }
+            if(this.x <= 0) {
+              this.x = 0;
+            }
+            if(this.y >= myGameArea.canvas.height) {
+              this.y = myGameArea.canvas.height;
+            }
+            if(this.y <= 0) {
+              this.y = 0;
+            }
           }
           this.moveForward = function() {
             this.speed = this.topSpeed;
