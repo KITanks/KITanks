@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Tank Game</title>
+    </head>
+    <body>
+        <script type="text/javascript">
+        var socket = new WebSocket("wss://echo.websocket.org");
+
+        socket.onopen = function() {
+            console.log("connection opened");
+
+            setTimeout(function() {
+                console.log("sending message...");
+                socket.send("hi i am a client");
+            }, 3000);
+        }
+
+        socket.onmessage = function(message) {
+            console.log("message: " + message);
+        }
+
+        socket.onclose = function() {
+            console.log("connection closed");
+        }
+
+        socket.onerror = function(error) {
+            console.log("error: " + error);
+        }
+        </script>
+    </body>
+</html>
