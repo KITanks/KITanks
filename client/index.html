@@ -14,7 +14,7 @@
       <script>
         //counts the nuber of trys
         var connectCounter = 0;
-
+        //connects to the server
         var socket = connect();
         //the id of your pc
         var pcid;
@@ -22,25 +22,22 @@
         var tankList = [];
         //you own very special tank boii
         var myTank;
-
+        //a list of all bullets in the air
         var bulletList = [];
-
-
-
-
+        //this method is executes at the start of every game
         socket.onopen = function() {
           socket.send('ping_pong');
           connectCounter = 0;
           myTank = new tank(20, 20, "yellow",100 , 100, 1, 2);
           myGameArea.start();
         }
-
         //this variable describes the battlefield
         var myGameArea = {
           canvas : document.createElement("canvas"),
 
           start : function() {
 
+            //the dimensions of the battlefield
             this.canvas.width = 600;
             this.canvas.height = 400;
 
@@ -98,30 +95,15 @@
             case 1:
               pcid = data.id;
               break;
-
             case 2:
-
+              //updates the list of tanks with all the info
               tankList = data.tanks;
-            /*  var enemyTank = [];
-              enemyTank[0] = data.id;
-              enemyTank[1] = data.x;
-              enemyTank[2] = data.y;
-              enemyTank[3] = data.ang;
-
-              for(var i = 0; i < enemyTanks.length; i++) {
-                var tempTank = enemyTanks[i];
-                if(tempTank[0] == enemyTank[0]) {
-                  enemyTanks[i] = enemyTank;
-                } else {
-                  enemyTanks.push(enemyTank);
-                }
-              }*/
               break;
-
             case 3:
               myGameArea.stop();
               break;
             case 4:
+              //updates the list of bullets with all the info
               bulletList = data.bullets;
               break;
             default:
@@ -129,15 +111,14 @@
           }
           console.log('Server: ' + message.data);
         }
-
+        //connects to the server
         function connect() {
           var tempSocket = new WebSocket("ws://192.168.178.30:3000");
           return tempSocket;
         }
-
         //this sends your position to the server
         function sendText() {
-
+          //sends all the relevant info of your tank to the server
           var msg = {
             pckid: 10,
             id: pcid,
@@ -148,42 +129,30 @@
           finalMsg = JSON.stringify(msg);
           return finalMsg;
         }
-
-        //this function is executed at the start if the game
-        /*  function startGame() {
-          myTank = new tank(20, 20, "yellow",100 , 100, 6, 4);
-          myGameArea.start();
-        }*/
-
         //this function updates the game while its running
         function updateGameArea() {
           myGameArea.clear();
           myTank.moveAngle = 0;
           myTank.speed = 0;
-
+          //all the possible key presses
           if (myGameArea.keys && (myGameArea.keys[37] || myGameArea.keys[65])) {myTank.rotateRight();}
           if (myGameArea.keys && (myGameArea.keys[39] || myGameArea.keys[68])) {myTank.rotateLeft();}
           if (myGameArea.keys && (myGameArea.keys[38] || myGameArea.keys[87])) {myTank.moveForward();}
           if (myGameArea.keys && (myGameArea.keys[40] || myGameArea.keys[83])) {myTank.moveBackward();}
           if (myGameArea.keys && (myGameArea.keys[86] || myGameArea.keys[32])) {shot();}
-
+          //draws all the bullets
           for(var i = 0; i < bulletList.length; i++) {
             drawBullet(bulletList[i].x, bulletList[i].y, bulletList[i].ang);
           }
-
+          //moves your tank
           myTank.newPos();
-
+          //draws the positions of all the tanks
           for(var i = 0;i < tankList.length; i++) {
             drawTank(tankList[i].id, tankList[i].x, tankList[i].y, tankList[i].ang);
           }
-
-      //    myTank.update();
-
-      //    console.log(myTank.angle / Math.PI * 180);
-
+          //updates the image
           window.requestAnimationFrame(updateGameArea);
         }
-
         //this function describes the tank
         function tank(width, height, color, x, y, topSpeed, topRotSpeed) {
           this.width = width;
@@ -243,7 +212,6 @@
             this.moveAngle = -this.topRotSpeed;
           }
         }
-
         //this function describes your shot
         function shot() {
 
@@ -252,7 +220,7 @@
                                       id: pcid}
                                     ));
         }
-
+        //draws a single bullet
         function drawBullet(x, y, ang) {
 
               ctx = myGameArea.context;
@@ -263,7 +231,7 @@
               ctx.fillRect(5 / -2, 7 / -2, 5, 7);
               ctx.restore();
         }
-
+        //draws a single tank
         function drawTank(id, x, y, ang) {
           ctx = myGameArea.context;
           ctx.save();
@@ -281,6 +249,6 @@
 
     </script>
     <P>shits not working man :(</p>
-    <P>TODO: hitboxes, gameworld borders, multiplayer, objective</p>
+    <P>TODO: hitboxes, walls and other objects, adding sprites, gameworld borders, objective, manual ip input(dedicated servers possible??)</p>
   </body>
 </html>
