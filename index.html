@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+      canvas {
+        border:1px solid #d3d3d3;
+        background-color: #f1f1f1;
+      }
+    </style>
+  </head>
+    <body>
+
+      <script>
+        //counts the nuber of trys
+        var connectCounter = 0;
+        //connects to the server
+        var socket = connect();
+        //the id of your pc
+        var pcid;
+        //al list of all enemy Tanks
+        var tankList = [];
+
+        var fistX;
+
+        var firstY;
+        //a list of all bullets in the air
+        var bulletList = [];
+        //this method is executes at the start of every game
+        socket.onopen = function() {
+          socket.send('ping_pong');
+          connectCounter = 0;
+          myTank = new tank(30, 30, "black",firstX , firstY, 1, 2);
+          myGameArea.start();
+        }
+        //this variable describes the battlefield
+        var myGameArea = {
+          canvas : document.createElement("canvas"),
+
+          start : function() {
+
+            //the dimensions of the battlefield
+            this.canvas.width = 600;
+            this.canvas.height = 400;
+
+            this.context = this.canvas.getContext("2d");
+            document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+            this.frameNo = 0;
+
+            window.requestAnimationFrame(updateGameArea);
+            //DONT TOUCH
+            this.interval = setInterval(function () {
+                	                 socket.send(
+                                      JSON.stringify({
+                                        pckid: 10,
+                                        id: pcid,
+                                        x: myTank.x,
+                                        y: myTank.y,
+                                        ang: myTank.angle / Math.PI * 180}))
+                                      }
+                                        , 16);
+                                        //DONT TOUCH
+
+            window.addEventListener('keydown', function (e) {
+              e.preventDefault();
+              myGameArea.keys = (myGameArea.keys || []);
+              myGameArea.keys[e.keyCode] = (e.type == "keydown");
+            })
+            window.addEventListener('keyup', function (e) {
+              myGameArea.keys[e.keyCode] = (e.type == "keydown");
+            })
+          },
+
+          stop : function() {
+            //clearInterval(this.interval);
+            window.cancelAnimationFrame(updateGameArea);
+
+          },
+
+          clear : function() {
+            this.context.clearRect(0,0, this.canvas.width, this.canvas.height);
+          }
+        }
+
+        socket.onerror = function(error) {
+          connectCounter++;
+          if(connectCounter >= 20) {
+            console.log('websockenerror ' + error);
+          } else {
+            connect();
+          }
+        }
+        //this updates the list of all tanks on the battlefield
+        socket.onmessage = function(message) {
+          var data = JSON.parse(message.data);
+          switch (data.pckid) {
+            case 1:
+              pcid = data.id;
+              firstX = data.x;
+              firstY = data.y;
+              break;
+            case 2:
+              //updates the list of tanks with all the info
+              tankList = data.tanks;
+              break;
+            case 3:
+              myGameArea.stop();
+              break;
+            case 4:
+              //updates the list of bullets with all the info
+              bulletList = data.bullets;
+              break;
+            default:
+
+          }
+          console.log('Server: ' + message.data);
+        }
+        //connects to the server
+        function connect() {
+          var tempSocket = new WebSocket("ws://192.168.178.30:3000");
+          return tempSocket;
+        }
+        //this sends your position to the server
+        function sendText() {
+          //sends all the relevant info of your tank to the server
+          var msg = {
+            pckid: 10,
+            id: pcid,
+            x: myTank.x,
+            y: myTank.y,
+            ang: myTank.angle
+          }
+          finalMsg = JSON.stringify(msg);
+          return finalMsg;
+        }
+        //this function updates the game while its running
+        function updateGameArea() {
+          myGameArea.clear();
+          myTank.moveAngle = 0;
+          myTank.speed = 0;
+          //all the possible key presses
+          if (myGameArea.keys && (myGameArea.keys[37] || myGameArea.keys[65])) {myTank.rotateRight();}
+          if (myGameArea.keys && (myGameArea.keys[39] || myGameArea.keys[68])) {myTank.rotateLeft();}
+          if (myGameArea.keys && (myGameArea.keys[38] || myGameArea.keys[87])) {myTank.moveForward();}
+          if (myGameArea.keys && (myGameArea.keys[40] || myGameArea.keys[83])) {myTank.moveBackward();}
+          if (myGameArea.keys && (myGameArea.keys[86] || myGameArea.keys[32])) {shot();}
+          //draws all the bullets
+          for(var i = 0; i < bulletList.length; i++) {
+            drawBullet(bulletList[i].x, bulletList[i].y, bulletList[i].ang);
+          }
+          //moves your tank
+          myTank.newPos();
+          //draws the positions of all the tanks
+          for(var i = 0;i < tankList.length; i++) {
+            drawTank(tankList[i].id, tankList[i].x, tankList[i].y, tankList[i].ang);
+          }
+          //updates the image
+          window.requestAnimationFrame(updateGameArea);
+        }
+        //this function describes the tank
+        function tank(width, height, color, x, y, topSpeed, topRotSpeed) {
+          this.width = width;
+          this.height = height;
+
+          this.x = x;
+          this.y = y;
+
+          this.speed = 0;
+          this.angle = 0;
+
+          this.moveAngle = 0;
+          this.topSpeed = topSpeed;
+          this.topRotSpeed = topRotSpeed;
+
+          this.update = function() {
+            ctx = myGameArea.context;
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle);
+            ctx.fillStyle = color;
+            ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
+            ctx.restore();
+          }
+
+          this.newPos = function() {
+
+            this.angle += this.moveAngle * Math.PI / 180;
+
+            this.x += this.speed * Math.sin(this.angle);
+            this.y -= this.speed * Math.cos(this.angle);
+            //this limits the tank to the current canvas
+            if(this.x >= myGameArea.canvas.width) {
+              this.x = myGameArea.canvas.width;
+            }
+            if(this.x <= 0) {
+              this.x = 0;
+            }
+            if(this.y >= myGameArea.canvas.height) {
+              this.y = myGameArea.canvas.height;
+            }
+            if(this.y <= 0) {
+              this.y = 0;
+            }
+          }
+          //the four different movment functions
+          this.moveForward = function() {
+            this.speed = this.topSpeed;
+          }
+          this.moveBackward = function() {
+            this.speed = -this.topSpeed
+          }
+          this.rotateLeft = function() {
+            this.moveAngle = this.topRotSpeed;
+          }
+          this.rotateRight = function() {
+            this.moveAngle = -this.topRotSpeed;
+          }
+        }
+        //this function describes your shot
+        function shot() {
+
+            socket.send(JSON.stringify({
+                                      pckid: 11,
+                                      id: pcid}
+                                    ));
+        }
+        //draws a single bullet
+        function drawBullet(x, y, ang) {
+
+              ctx = myGameArea.context;
+              ctx.save();
+              ctx.translate(x, y);
+              ctx.rotate(ang * Math.PI / 180);
+              ctx.fillStyle = "green";
+              ctx.fillRect(5 / -2, 7 / -2, 5, 7);
+              ctx.restore();
+        }
+        //draws a single tank
+        function drawTank(id, x, y, ang) {
+          ctx = myGameArea.context;
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(ang * Math.PI / 180);
+
+          if (id == pcid) {
+            ctx.fillStyle = "blue";
+          } else {
+            ctx.fillStyle = "red";
+          }
+          ctx.fillRect(20 / -2, 25 / -2, 20, 25);
+          ctx.restore();
+        }
+
+    </script>
+    <P>dank tanks fighting each other until one explodes  \m/(>.<)\m/ </p>
+    <P>TODO: hitboxes, walls and other objects, adding sprites, gameworld borders, objective, manual ip input(dedicated servers possible??)</p>
+  </body>
+</html>
