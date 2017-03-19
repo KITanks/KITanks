@@ -204,8 +204,11 @@
         }
 
         function drawBullet(x, y, ang) {
+          var canvasX = (x / MAP_WIDTH) * canvas.width;
+          var canvasY = (y / MAP_HEIGHT) * canvas.height;
+
           ctx.save();
-          ctx.translate(x, y);
+          ctx.translate(canvasX, canvasY);
           ctx.rotate(ang * Math.PI / 180);
           ctx.fillStyle = "green";
           ctx.fillRect(5 / -2, 7 / -2, 5, 7);
