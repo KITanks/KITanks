@@ -31,6 +31,7 @@
         document.addEventListener("DOMContentLoaded", function() {
         var canvas = document.getElementById("canvas");
         var ctx = canvas.getContext("2d");
+        canvas.style.cursor = "none";
 
         var socket = new WebSocket("ws://192.168.178.30:3000");
         var uuid = -1;
@@ -41,6 +42,9 @@
 
         var MAP_WIDTH = 2000;
         var MAP_HEIGHT = 1000;
+
+        var cursorX = 1;
+        var cursorY = 1;
 
         var lastFrame = Date.now();
 
@@ -122,7 +126,8 @@
             id: uuid,
             x: tank.x,
             y: tank.y,
-            ang: tank.angle
+            ang: tank.angle,
+            tur: tank.turretAngle
           });
         }
 
@@ -169,8 +174,12 @@
           this.topSpeed = topSpeed;
           this.topRotSpeed = topRotSpeed;
 
+          this.turretAngle = 1;
+
           this.update = function(dt) {
             this.angle += 0.05 * dt * this.moveAngle * Math.PI / 180;
+
+            this.turretAngle = Math.atan(Math.sin(cursorX)/Math.cos(cursorY));
 
             this.x += 0.1 * dt * this.speed * Math.sin(this.angle);
             this.y -= 0.1 * dt * this.speed * Math.cos(this.angle);
@@ -228,7 +237,7 @@
           ctx.restore();
         }
 
-        function drawTank(id, x, y, ang) {
+        function drawTank(id, x, y, ang, tur) {
           var canvasX = (x / MAP_WIDTH) * canvas.width;
           var canvasY = (y / MAP_HEIGHT) * canvas.height;
 
@@ -247,6 +256,11 @@
           }
           ctx.fillRect(ratioX*(-10), ratioY*(-12), ratioX*(20), ratioY*(24));
 
+          ctx.moveTo(canvasX, canvasY);
+          ctx.lineTo(5* Math.sin(tur),
+                     5* Math.cos(tur));
+          ctx.stroke();
+
           ctx.restore();
         }
 
@@ -261,7 +275,12 @@
         }
 
         window.addEventListener("resize", resize);
+
+        window.addEventListener('mousemove', function (e) {
+            cursorX = e.pageX;
+            cursorY = e.pageY;
       });
+
     </script>
   </body>
 </html>
