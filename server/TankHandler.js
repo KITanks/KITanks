@@ -24,6 +24,9 @@ function TankHandler(server, client) {
     this.y = pos.y;
     this.ang = 90;
 
+    this.width = 20;
+    this.length = 24;
+
     // time of last bullet
     this.lastBulletShot = 0;
 }
@@ -156,7 +159,6 @@ TankHandler.prototype.spawnBullet = function() {
     if (now - this.lastBulletShot < this.server.config.server_bullet_interval)
         return;
 
-    console.log("spawning bullet..");
     this.server.spawnBullet(this.x, this.y, this.ang);
 
     this.lastBulletShot = now;

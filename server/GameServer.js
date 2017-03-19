@@ -1,4 +1,4 @@
-var WebSocketServer = require("ws").Server;
+var WebSocket = require("ws");
 var TankHandler = require("./TankHandler.js");
 var Bullet = require("./Bullet.js");
 
@@ -52,7 +52,7 @@ module.exports = GameServer;
  * Starts the websocket server
  */
 GameServer.prototype.start = function() {
-    this.server = new WebSocketServer({port: this.port}, function() {
+    this.server = new WebSocket.Server({port: this.port}, function() {
         this.log(LogType.INFO, "Server listening on port :" + this.port);
     }.bind(this));
 
@@ -133,22 +133,35 @@ GameServer.prototype.loop = function() {
         bullet.update(dt);
     }.bind(this));
 
-    // build data
-    var bulletData = this.getBulletData();
+    this.bullets.forEach(function(bullet) {
+        this.bullets.forEach(function(other) {
+            if (bullet.getId() == other.getId())
+                return;
 
-    this.clients.forEach(function(cl) {
-        // check last update time, kick if no recent response
-        if (now - cl.handler.getLastUpdate() > this.config.server_kick_after) {
-            var id = cl.handler.getId();
-            // kick and remove from list
-            this.kickClient(cl);
+            if (this.circleCircleCollision(bullet.x, bullet.y, bullet.radius,
+                                           other.x, other.y, other.radius)) {
+                this.removeBullet(bullet.getId());
+                this.removeBullet(other.getId());
+            }
+        }.bind(this));
+    }.bind(this));
+
+    this.clients.forEach(function(client) {
+        if (now - client.handler.getLastUpdate() > this.config.server_kick_after) {
+            var id = client.handler.getId();
+
+            this.kickClient(client);
             this.removeClient(id);
         }
     }.bind(this));
 
+    // build data
+    var bulletData = this.getBulletData();
     var tankData = this.getTankData();
 
     this.clients.forEach(function(client) {
+        if (client.readyState !== WebSocket.OPEN)
+            return;
         client.send(tankData);
         client.send(bulletData);
     });
@@ -188,7 +201,6 @@ GameServer.prototype.removeBullet = function(id) {
 GameServer.prototype.spawnBullet = function(x, y, ang) {
     var bullet = new Bullet(this, this.getUniqueBulletId(), x, y, ang);
     this.bullets.push(bullet);
-    console.log(bullet.getId());
 }
 
 /**
@@ -280,4 +292,12 @@ GameServer.prototype.getRandomPosition = function() {
         x: Math.floor(Math.random() * this.config.map_width),
         y: Math.floor(Math.random() * this.config.map_height)
     }
+}
+
+GameServer.prototype.circleCircleCollision = function(x1, y1, r1, x2, y2, r2) {
+    return this.getDistance(x1, y1, x2, y2) <= r1 + r2;
+}
+
+GameServer.prototype.getDistance = function(x1, y1, x2, y2) {
+    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 }
