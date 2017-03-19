@@ -1,0 +1,24 @@
+{
+  "name": "kitanks",
+  "version": "1.0.0",
+  "description": "Simple web-based tank game created during the \"Hack und Soehne\" Hackathon in Karlsruhe",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KITanks/KITanks.git"
+  },
+  "keywords": [
+    "tank",
+    "game",
+    "web",
+    "websocket",
+    "nodejs"
+  ],
+  "author": "Luke 'luk3b' Brocke",
+  "license": "MIT",
+  "bugs": {},
+  "homepage": "https://github.com/KITanks/KITanks"
+}
