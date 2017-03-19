@@ -6,7 +6,7 @@ function Bullet(server, id, x, y, ang) {
     this.y = y;
     this.ang = ang;
 
-    this.velocity = 2;
+    this.velocity = 5;
 
     this.border = 10;
 }

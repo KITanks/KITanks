@@ -42,6 +42,8 @@
         var MAP_WIDTH = 2000;
         var MAP_HEIGHT = 1000;
 
+        var lastFrame = Date.now();
+
         resize();
 
         socket.onopen = function() {
@@ -125,6 +127,9 @@
         }
 
         function gameLoop() {
+          var now = Date.now();
+          var dt = now - lastFrame;
+
           clear();
 
           tank.moveAngle = 0;
@@ -140,11 +145,13 @@
             drawBullet(bulletList[i].x, bulletList[i].y, bulletList[i].ang);
           }
 
-          tank.update();
+          tank.update(dt);
 
           for(var i = 0;i < tankList.length; i++) {
             drawTank(tankList[i].id, tankList[i].x, tankList[i].y, tankList[i].ang);
           }
+
+          lastFrame = now;
 
           window.requestAnimationFrame(gameLoop);
         }
@@ -160,11 +167,11 @@
           this.topSpeed = topSpeed;
           this.topRotSpeed = topRotSpeed;
 
-          this.update = function() {
-            this.angle += this.moveAngle * Math.PI / 180;
+          this.update = function(dt) {
+            this.angle += 0.05 * dt * this.moveAngle * Math.PI / 180;
 
-            this.x += this.speed * Math.sin(this.angle);
-            this.y -= this.speed * Math.cos(this.angle);
+            this.x += 0.1 * dt * this.speed * Math.sin(this.angle);
+            this.y -= 0.1 * dt * this.speed * Math.cos(this.angle);
 
             if(this.x >= MAP_WIDTH) {
               this.x = MAP_WIDTH;
