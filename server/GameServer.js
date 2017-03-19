@@ -1,5 +1,6 @@
 var WebSocketServer = require("ws").Server;
 var TankHandler = require("./TankHandler.js");
+var Bullet = require("./Bullet.js");
 
 /**
  * Logging types for log function
@@ -36,10 +37,12 @@ function GameServer(port) {
 
     // gameserver config
     this.config = {
-        tickrate: 60,    // ticks per second
-        max_players: 10, // max players
-        kick_after: 1000,
-        bullet_interval: 1000
+        server_tickrate: 60,          // ticks per second
+        server_max_players: 10,       // max players
+        server_kick_after: 1000,      // kick after # ms of inactivity
+        server_bullet_interval: 1000, // one bullet every # ms
+        map_width: 2000,              // width units
+        map_height: 1000              // height units
     }
 }
 
@@ -65,7 +68,7 @@ GameServer.prototype.start = function() {
 
     function onConnection(client) {
         // check for max player count
-        if (this.clients.length >= this.config.max_players) {
+        if (this.clients.length >= this.config.server_max_players) {
             this.log(LogType.ERROR, "Server exceeds maximum player count, kicking client...");
             
             this.kickClient(client);
@@ -77,7 +80,6 @@ GameServer.prototype.start = function() {
         // message listener
         client.on("message", function onMessage(message) {
             try {
-                console.log("got message");
                 // parse data and check for player id
                 var data = JSON.parse(message);
                 if (!data.hasOwnProperty("id"))
@@ -114,9 +116,9 @@ GameServer.prototype.start = function() {
     // start game loop
     setInterval(function() {
         this.loop();
-    }.bind(this), 1000 / this.config.tickrate);
+    }.bind(this), 1000 / this.config.server_tickrate);
 
-    this.log(LogType.INFO, "Simulating at " + this.config.tickrate + " ticks per second");
+    this.log(LogType.INFO, "Simulating at " + this.config.server_tickrate + " ticks per second");
 }
 
 /**
@@ -136,7 +138,7 @@ GameServer.prototype.loop = function() {
 
     this.clients.forEach(function(cl) {
         // check last update time, kick if no recent response
-        if (now - cl.handler.getLastUpdate() > this.config.kick_after) {
+        if (now - cl.handler.getLastUpdate() > this.config.server_kick_after) {
             var id = cl.handler.getId();
             // kick and remove from list
             this.kickClient(cl);
@@ -174,6 +176,19 @@ GameServer.prototype.broadcast = function(message) {
         if (client.readyState == WebSocket.OPEN)
             client.send(message);
     });
+}
+
+GameServer.prototype.removeBullet = function(id) {
+    for (var i = 0; i < this.bullets.length; i++) {
+        if (this.bullets[i].getId() == id)
+            this.bullets.splice(i, 1);
+    }
+}
+
+GameServer.prototype.spawnBullet = function(x, y, ang) {
+    var bullet = new Bullet(this, this.getUniqueBulletId(), x, y, ang);
+    this.bullets.push(bullet);
+    console.log(bullet.getId());
 }
 
 /**
@@ -258,4 +273,11 @@ GameServer.prototype.getClientById = function(address, id) {
     }
 
     return null;
+}
+
+GameServer.prototype.getRandomPosition = function() {
+    return {
+        x: Math.floor(Math.random() * this.config.map_width),
+        y: Math.floor(Math.random() * this.config.map_height)
+    }
 }

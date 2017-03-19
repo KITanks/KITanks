@@ -1,5 +1,3 @@
-var Bullet = require("./Bullet.js");
-
 /**
  * TankHandler, stores data for a tank and parses messages
  *   from client
@@ -19,10 +17,12 @@ function TankHandler(server, client) {
     // time of last update
     this.lastUpdate = Date.now();
 
+    var pos = this.server.getRandomPosition();
+
     // coords and rotation
-    this.x = -1;
-    this.y = -1;
-    this.ang = 0;
+    this.x = pos.x;
+    this.y = pos.y;
+    this.ang = 90;
 
     // time of last bullet
     this.lastBulletShot = 0;
@@ -62,7 +62,9 @@ TankHandler.prototype.setId = function(id) {
 TankHandler.prototype.sendPacket01 = function() {
     var data = {
         pckid: 1,
-        id: this.id
+        id: this.id,
+        x: this.x,
+        y: this.y
     }
 
     this.client.send(JSON.stringify(data));
@@ -94,12 +96,30 @@ TankHandler.prototype.setData = function(data) {
     if (this.id == -1)
         return;
 
-    this.x = data.x;
-    this.y = data.y;
-    this.ang = data.ang;
+    this.x = this.limit(data.x, 0, this.server.config.map_width);
+    this.y = this.limit(data.y, 0, this.server.config.map_height);
+    this.ang = this.map(data.ang, 0, 360);
     
     // update time
     this.lastUpdate = Date.now();
+}
+
+TankHandler.prototype.limit = function(val, min, max) {
+    if (val < min)
+        return min;
+    else if(val > max)
+        return max;
+    else
+        return val;
+}
+
+TankHandler.prototype.map = function(val, min, max) {
+    if (val < min)
+        return val + max;
+    else if (val > max)
+        return val - max;
+    else
+        return val;
 }
 
 /**
@@ -131,13 +151,11 @@ TankHandler.prototype.handleMessage = function(data) {
 TankHandler.prototype.spawnBullet = function() {
     var now = Date.now();
 
-    if (now - this.lastBulletShot < this.server.config.bullet_interval)
+    if (now - this.lastBulletShot < this.server.config.server_bullet_interval)
         return;
 
-    var bullet = new Bullet(this.server.getUniqueBulletId(), this.x, this.y, this.ang);
-    this.server.bullets.push(bullet);
-
-    console.log("added bullet " + bullet.id);
+    console.log("spawning bullet..");
+    this.server.spawnBullet(this.x, this.y, this.ang);
 
     this.lastBulletShot = now;
 }
