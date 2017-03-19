@@ -27,7 +27,7 @@
         //al list of all enemy Tanks
         var tankList = [];
 
-        var fistX;
+        var firstX;
 
         var firstY;
         //a list of all bullets in the air
@@ -36,6 +36,7 @@
         socket.onopen = function() {
           socket.send('ping_pong');
           connectCounter = 0;
+          myTank = new tank(30, 30, "black",firstX , firstY, 1, 2);
           myGameArea.start();
         }
         //this variable describes the battlefield
@@ -53,7 +54,6 @@
             document.body.insertBefore(this.canvas, document.body.childNodes[0]);
             this.frameNo = 0;
 
-            myTank = new tank(30, 30, "black",firstX , firstY, 1, 2);
 
             this.interval = setInterval(function () {
                 	                 socket.send(
@@ -106,7 +106,9 @@
             case 1:
               pcid = data.id;
               firstX = data.x;
+              myTank.x = data.x;
               firstY = data.y;
+              myTank.y = data.y;
               break;
             case 2:
               //updates the list of tanks with all the info
