@@ -291,7 +291,7 @@
         function updateScoreList() {
           scoreTankList = tankList;
           scoreTankList.sort(function(a, b) {
-            return a.score - b.score
+            return b.scr - a.scr;
           })
           scores.innerHTML = "";
           for (var i = 0; i < scoreTankList.length; i++) {
