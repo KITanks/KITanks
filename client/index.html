@@ -118,6 +118,8 @@
               tank.y = data.y;
               tank.angle = data.ang;
               tank.turretAngle = data.tur;
+              tank.score = data.scr;
+              break;
             default:
               break;
           }
@@ -130,7 +132,8 @@
             x: tank.x,
             y: tank.y,
             ang: tank.angle,
-            tur: tank.turretAngle
+            tur: tank.turretAngle,
+            scr: tank.score
           });
         }
 
