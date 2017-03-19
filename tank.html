@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width"/>
+    <style>
+      html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0px;
+        border: 0;
+      }
+      #canvas {
+        border:1px solid #d3d3d3;
+        background: url("images/ground.jpg") repeat;
+      }
+      #info {
+        position: absolute;
+        left: 10px;
+        bottom: 10px;
+        font-size: 20px;
+        color: red;
+        font-weight: bold;
+        font-family: monospace;
+      }
+      #table {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        height: 100px;
+        background-color: rgba(255, 255, 255, .3);
+        border-radius: 10px;
+        width: 100px;
+        height: 200px;
+        padding: 4px;
+        font-size: 18px;
+        font-family: monospace;
+        overflow: hidden;
+        color: rgb(220, 220, 220);
+      }
+    </style>
+  </head>
+    <body>
+      <canvas id="canvas"></canvas>
+      <div id="table">
+        <table id="scores" border="0"></table>
+      </div>
+      <div id="info">
+      <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        var scores = document.getElementById("scores");
+        var socket = new WebSocket("ws://192.168.178.30:3000");
+        var uuid = -1;
+        var tank = null;
+        var tankList = [];
+        var bulletList = [];
+        var explosionList = [];
+        var mineList = [];
+        var MAP_WIDTH = 2000;
+        var MAP_HEIGHT = 1000;
+        var scoreList = [];
+        var lastFrame = Date.now();
+        resize();
+        socket.onopen = function() {
+          Game.start();
+        }
+        socket.onerror = function() {
+          setText("Connection error!");
+          clear();
+        }
+        socket.onclose = function() {
+          setText("Connection to server closed!");
+          clear();
+        }
+        var Game = {
+          start: function() {
+            setInterval(function() {
+              socket.send(JSON.stringify({
+                pckid: 10,
+                id: uuid,
+                x: tank.x,
+                y: tank.y,
+                ang: tank.angle,
+                tur: tank.turretAngle
+              }))
+            }, 16);
+            window.requestAnimationFrame(gameLoop);
+            window.addEventListener('keydown', function (e) {
+             e.preventDefault();
+             Game.keys = (Game.keys || []);
+             Game.keys[e.keyCode] = (e.type == "keydown");
+            });
+            window.addEventListener('keyup', function (e) {
+              Game.keys[e.keyCode] = (e.type == "keydown");
+            });
+          },
+          stop: function() {
+            window.cancelAnimationFrame(gameLoop);
+          }
+        }
+        function clear() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        socket.onmessage = function(message) {
+          var data = JSON.parse(message.data);
+          switch (data.pckid) {
+            case 1:
+              uuid = data.id;
+              tank = new Tank(data.x, data.y, 1, 2, 3);
+              Game.start();
+              break;
+            case 2:
+              tankList = data.tanks;
+              break;
+            case 3:
+              Game.stop();
+              break;
+            case 4:
+              bulletList = data.bullets;
+              break;
+            case 5:
+              console.log("paket");
+              tank.x = data.x;
+              tank.y = data.y;
+              tank.angle = data.ang;
+              tank.turretAngle = data.tur;
+              tank.score = data.scr;
+              break;
+            case 6:
+              console.log("data");
+              explosion(data.x, data.y);
+              break;
+            case 7:
+              console.log("bbbbooom?");
+              mineList = data.mines;
+              break;
+            default:
+              break;
+          }
+        }
+        function sendData() {
+          return JSON.stringify({
+            pckid: 10,
+            id: uuid,
+            x: tank.x,
+            y: tank.y,
+            ang: tank.angle,
+            tur: tank.turretAngle,
+            scr: tank.score
+          });
+        }
+        function gameLoop() {
+          clear();
+          var now = Date.now();
+          var dt = now - lastFrame;
+          tank.moveAngle = 0;
+          tank.speed = 0;
+          tank.moveTurretAngle = 0;
+
+          //explosion(1000,500);
+
+          if (Game.keys && (Game.keys[39])) { tank.rotTurrRight(); }
+          if (Game.keys && (Game.keys[37])) { tank.rotTurrLeft(); }
+          if (Game.keys && (Game.keys[65])) { tank.rotateRight(); }
+          if (Game.keys && (Game.keys[68])) { tank.rotateLeft(); }
+          if (Game.keys && (Game.keys[87])) { tank.moveForward(); }
+          if (Game.keys && (Game.keys[83])) { tank.moveBackward(); }
+          if (Game.keys && (Game.keys[86] || Game.keys[32])) { shot(); }
+          for(var i = 0; i < bulletList.length; i++) {
+            drawBullet(bulletList[i].x, bulletList[i].y, bulletList[i].ang);
+          }
+          tank.update(dt);
+          for(var i = 0;i < tankList.length; i++) {
+            drawTank(tankList[i].id, tankList[i].x, tankList[i].y, tankList[i].ang, tankList[i].tur);
+          }
+          updateScoreList();
+          for(var i = 0;i < mineList.length; i++) {
+            drawMine(mineList[i].x, mineList[i].y);
+          }
+          for(var i = 0;i < explosionList.length; i++) {
+            if(now - explosionList[i].date < 500) {
+              drawExplosion(explosionList[i].x, explosionList[i].y);
+            }
+          }
+          lastFrame = now;
+          window.requestAnimationFrame(gameLoop);
+        }
+        function Tank(x, y, bodySpeed, bodyRotSpeed, turRotSpeed) {
+          this.x = x;
+          this.y = y;
+          this.speed = 0;
+          this.angle = 0;
+          this.turretAngle = 0;
+          this.moveAngle = 0;
+          this.moveTurretAngle = 0;
+          this.topSpeed = bodySpeed;
+          this.topRotSpeed = bodyRotSpeed;
+          this.topTurSpeed = turRotSpeed;
+          this.update = function(dt) {
+            this.angle += 0.05 * dt * this.moveAngle; // degrees
+            this.turretAngle += 0.05 * dt * -this.moveTurretAngle;
+            this.x += 0.1 * dt * this.speed * Math.sin(this.angle * Math.PI / 180);
+            this.y -= 0.1 * dt * this.speed * Math.cos(this.angle * Math.PI / 180);
+            if(this.x >= MAP_WIDTH) {
+              this.x = MAP_WIDTH;
+            }
+            if(this.x <= 0) {
+              this.x = 0;
+            }
+            if(this.y >= MAP_HEIGHT) {
+              this.y = MAP_HEIGHT;
+            }
+            if(this.y <= 0) {
+              this.y = 0;
+            }
+          }
+          this.rotTurrLeft = function() {
+            this.moveTurretAngle = this.topTurSpeed;
+          }
+          this.rotTurrRight = function() {
+            this.moveTurretAngle = -this.topTurSpeed;
+          }
+          this.moveForward = function() {
+            this.speed = this.topSpeed;
+          }
+          this.moveBackward = function() {
+            this.speed = -this.topSpeed;
+          }
+          this.rotateLeft = function() {
+            this.moveAngle = this.topRotSpeed;
+          }
+          this.rotateRight = function() {
+            this.moveAngle = -this.topRotSpeed;
+          }
+        }
+        function shot() {
+          socket.send(JSON.stringify({
+            pckid: 11,
+            id: uuid
+          }));
+        }
+        function drawBullet(x, y, ang) {
+          var canvasX = (x / MAP_WIDTH) * canvas.width;
+          var canvasY = (y / MAP_HEIGHT) * canvas.height;
+          var ratioX = canvas.width/MAP_WIDTH;
+          var ratioY = canvas.height/MAP_HEIGHT;
+          ctx.save();
+          ctx.translate(canvasX, canvasY);
+          ctx.rotate(ang * Math.PI / 180);
+          ctx.fillStyle = "#cc00cc";
+          ctx.fillRect(ratioX*(5 / -2), ratioY*(7 / -2), ratioX*(5), ratioY*(7));
+          ctx.restore();
+        }
+        function drawTank(id, x, y, ang, tur) {
+          var canvasX = (x / MAP_WIDTH) * canvas.width;
+          var canvasY = (y / MAP_HEIGHT) * canvas.height;
+          var ratioX = canvas.width/MAP_WIDTH;
+          var ratioY = canvas.height/MAP_HEIGHT;
+          //tank chains
+          ctx.save();
+          ctx.translate(canvasX, canvasY);
+          ctx.rotate(ang * Math.PI / 180);
+          ctx.fillStyle = "black";
+          ctx.fillRect(ratioX*(-13), ratioY*(-10), ratioX*(26), ratioY*(20));
+          ctx.restore();
+          //tank body
+          ctx.save();
+          ctx.translate(canvasX, canvasY);
+          ctx.rotate(ang * Math.PI / 180);
+          if (id == uuid) {
+            ctx.fillStyle = "blue";
+          } else {
+            ctx.fillStyle = "red";
+          }
+          ctx.fillRect(ratioX*(-10), ratioY*(-13), ratioX*(20), ratioY*(26));
+          ctx.restore();
+          //yellow front marker
+          ctx.save();
+          ctx.translate(canvasX, canvasY);
+          ctx.rotate(ang * Math.PI / 180);
+          ctx.fillStyle = "#00ff00";
+          ctx.fillRect(ratioX*(-5), ratioY*(-14), ratioX*(10), ratioY*(4));
+          ctx.restore();
+          //citcle thingy on turret
+          ctx.save();
+          ctx.translate(canvasX, canvasY);
+          ctx.rotate(tur * Math.PI / 180);
+          ctx.beginPath();
+          ctx.arc(0, 0, 5 ,0, 2*Math.PI);
+          if(id == uuid) {
+            ctx.fillStyle = "#00004d";
+          } else {
+            ctx.fillstyle = "#cc0000"
+          }
+          ctx.fill();
+          ctx.restore();
+          //turret
+          ctx.save();
+          ctx.translate(canvasX, canvasY);
+          ctx.rotate(tur * Math.PI / 180);
+          ctx.fillStyle = "black"
+          ctx.fillRect(ratioX * -3, ratioY * 0, ratioX * 6, ratioY * -26);
+          ctx.restore();
+        }
+        function setText(message) {
+          document.getElementById("info").innerHTML = message;
+        }
+        function resize() {
+          canvas.width = window.innerWidth - 2;
+          canvas.height = window.innerWidth / 2;
+        }
+        function updateScoreList() {
+          scoreTankList = tankList;
+          scoreTankList.sort(function(a, b) {
+            return b.scr - a.scr;
+          })
+          scores.innerHTML = "";
+          for (var i = 0; i < scoreTankList.length; i++) {
+            var row = scores.insertRow(scores.rows.length);
+            var cell = row.insertCell(0);
+            cell.innerHTML = "#" + scoreTankList[i].id + ": " + scoreTankList[i].scr;
+          //  console.log("score of #" + scoreTankList[i].id + ": " + scoreTankList[i].scr);
+          }
+        }
+        function drawExplosion(x, y) {
+          var canvasX = (x / MAP_WIDTH) * canvas.width;
+          var canvasY = (y / MAP_HEIGHT) * canvas.height;
+          ctx.save();
+          ctx.translate(canvasX, canvasY);
+          ctx.beginPath();
+          ctx.arc(0, 0, 40, 0, 2*Math.PI, false);
+          ctx.fillStyle = "#ffffff";
+          ctx.fill();
+          ctx.restore();
+          currentTime = Date.now();
+
+          console.log("olle");
+        }
+        function explosion(x, y) {
+          currentTime = Date.now();
+          explosionList.push({x:x, y:y , date: currentTime});
+          drawExplosion(x ,y);
+        }
+        function mine(x, y) {
+          this.x = x;
+          this.y = y;
+        }
+        function drawMine(x, y) {
+            var canvasX = (x / MAP_WIDTH) * canvas.width;
+            var canvasY = (y / MAP_HEIGHT) * canvas.height;
+            var ratioX = canvas.width/MAP_WIDTH;
+            var ratioY = canvas.height/MAP_HEIGHT;
+
+            ctx.save();
+            ctx.translate(canvasX, canvasY);
+            ctx.fillStyle = "black"
+            ctx.fillRect(ratioX * -7, ratioY * 7, ratioX * 14, ratioY * -14);
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(canvasX, canvasY);
+            ctx.fillStyle = "yellow"
+            ctx.fillRect(ratioX * -5, ratioY * 5, ratioX * 10, ratioY * -10);
+            ctx.restore();
+        }
+
+        window.addEventListener("resize", resize);
+        window.addEventListener('mousemove', function (e) {
+            cursorX = e.pageX;
+            cursorY = e.pageY;
+          });
+        });
+    </script>
+  </body>
+</html>
