@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-ratio=1.0"/>
+  <meta name="viewport" content="width=device-width"/>
     <style>
       html, body {
         width: 100%;
@@ -116,6 +116,8 @@
             case 5:
               tank.x = data.x;
               tank.y = data.y;
+              tank.angle = ang;
+              tank.turretAngle = tur;
             default:
               break;
           }
@@ -189,8 +191,8 @@
             this.angle += 0.05 * dt * this.moveAngle; // degrees
             this.turretAngle += 0.05 * dt * -this.moveTurretAngle;
 
-            this.x += 0.1 * dt * this.speed * Math.sin(this.angle * Math.PI  / 180);
-            this.y -= 0.1 * dt * this.speed * Math.cos(this.angle * Math.PI  / 180);
+            this.x += 0.1 * dt * this.speed * Math.sin(this.angle * Math.PI / 180);
+            this.y -= 0.1 * dt * this.speed * Math.cos(this.angle * Math.PI / 180);
 
             if(this.x >= MAP_WIDTH) {
               this.x = MAP_WIDTH;
@@ -298,7 +300,6 @@
         }
 
         function resize() {
-          console.log("resize");
           canvas.width = window.innerWidth - 2;
           canvas.height = window.innerWidth / 2;
         }
