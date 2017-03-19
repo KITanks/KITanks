@@ -124,6 +124,9 @@
               tank.turretAngle = data.tur;
               tank.score = data.scr;
               break;
+            case 6:
+              explosion(data.x, data.y);
+              break;
             default:
               break;
           }
@@ -300,6 +303,15 @@
             cell.innerHTML = "#" + scoreTankList[i].id + ": " + scoreTankList[i].scr;
             console.log("score of #" + scoreTankList[i].id + ": " + scoreTankList[i].scr);
           }
+        }
+        function explosion(x, y) {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.beginPath();
+          ctx.arc(0, 0, 5 ,0, 2*Math.PI);
+            ctx.fillStyle = "#00004d";
+          ctx.fill();
+          ctx.restore();
         }
         window.addEventListener("resize", resize);
         window.addEventListener('mousemove', function (e) {
