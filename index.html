@@ -1,264 +1,360 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
 <html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <style>
-      canvas {
-        border:1px solid #d3d3d3;
-        background-color: #f1f1f1;
-      }
-      html, body {
-        width: 100%;
-        height: 100%;
-        margin: 0px;
-        border: 0;
-      }
-    </style>
-  </head>
-    <body>
+	<head>
+		<title>Tanky - A minigame</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body>
 
-      <script>
-        //counts the nuber of trys
-        var connectCounter = 0;
-        //connects to the server
-        var socket = connect();
-        //the id of your pc
-        var pcid;
-        //al list of all enemy Tanks
-        var tankList = [];
+		<!-- Wrapper -->
+			<div id="wrapper">
 
-        var fistX;
+				<!-- Header -->
+					<header id="header">
+						<div class="logo">
+							<span class="icon fa-square"></span>
+						</div>
+						<div class="content">
+							<div class="inner">
+								<h1>Tanky</h1>
+								<p><!--[-->A minigame</a><!--]--><br />
+								<!--[--> <!--]--></p>
+							</div>
+						</div>
+						<nav>
+							<ul>
+								<li><a href="tank.html">Play</a></li>
+								<li><a href="#highscore">Highscore</a></li>
+								<li><a href="#about">About</a></li>
+								<li><a href="#contact">Contact</a></li>
+								<!--<li><a href="#elements">Elements</a></li>-->
+							</ul>
+						</nav>
+					</header>
 
-        var firstY;
-        //a list of all bullets in the air
-        var bulletList = [];
-        //this method is executes at the start of every game
-        socket.onopen = function() {
-          socket.send('ping_pong');
-          connectCounter = 0;
-          myTank = new tank(30, 30, "black",firstX , firstY, 1, 2);
-          myGameArea.start();
-        }
-        //this variable describes the battlefield
-        var myGameArea = {
-          canvas : document.createElement("canvas"),
+				<!-- Main -->
+					<div id="main">
 
-          start : function() {
+						<!-- Intro -->
+							<article id="intro">
+								<h2 class="major">Intro</h2>
+								<span class="image main"><img src="images/pic01.jpg" alt="" /></span>
+								<p>Aenean ornare velit lacus, ac varius enim ullamcorper eu. Proin aliquam facilisis ante interdum congue. Integer mollis, nisl amet convallis, porttitor magna ullamcorper, amet egestas mauris. Ut magna finibus nisi nec lacinia. Nam maximus erat id euismod egestas. By the way, check out my <a href="#work">awesome work</a>.</p>
+								<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis dapibus rutrum facilisis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Etiam tristique libero eu nibh porttitor fermentum. Nullam venenatis erat id vehicula viverra. Nunc ultrices eros ut ultricies condimentum. Mauris risus lacus, blandit sit amet venenatis non, bibendum vitae dolor. Nunc lorem mauris, fringilla in aliquam at, euismod in lectus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In non lorem sit amet elit placerat maximus. Pellentesque aliquam maximus risus, vel sed vehicula.</p>
+							</article>
 
-            //the dimensions of the battlefield
-            this.canvas.width = 2000;
-            this.canvas.height = 1000;
+						<!-- Work -->
+							<article id="highscore">
+								<h2 class="major">Highscore</h2>
+								<span class="image main"><img src="images/pic02.jpg" alt="" /></span>
+								<p>Adipiscing magna sed dolor elit. Praesent eleifend dignissim arcu, at eleifend sapien imperdiet ac. Aliquam erat volutpat. Praesent urna nisi, fringila lorem et vehicula lacinia quam. Integer sollicitudin mauris nec lorem luctus ultrices.</p>
+								<p>Nullam et orci eu lorem consequat tincidunt vivamus et sagittis libero. Mauris aliquet magna magna sed nunc rhoncus pharetra. Pellentesque condimentum sem. In efficitur ligula tate urna. Maecenas laoreet massa vel lacinia pellentesque lorem ipsum dolor. Nullam et orci eu lorem consequat tincidunt. Vivamus et sagittis libero. Mauris aliquet magna magna sed nunc rhoncus amet feugiat tempus.</p>
+							</article>
 
-            this.context = this.canvas.getContext("2d");
-            document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-            this.frameNo = 0;
+						<!-- About -->
+							<article id="about">
+								<h2 class="major">About</h2>
+								<span class="image main"><img src="images/pic03.jpg" alt="" /></span>
+								<p>Tanky is a simple web-based tank game created during the "Hack und Söhne" Hackathon on the 18th March of 2017. Client game is written in JavaScript, server is based on NodeJS. Networking implemented using WebSockets.</p>
+							</article>
 
-            window.requestAnimationFrame(updateGameArea);
-            //DONT TOUCH
-            this.interval = setInterval(function () {
-                	                 socket.send(
-                                      JSON.stringify({
-                                        pckid: 10,
-                                        id: pcid,
-                                        x: myTank.x,
-                                        y: myTank.y,
-                                        ang: myTank.angle / Math.PI * 180}))
-                                      }
-                                        , 16);
-                                        //DONT TOUCH
+						<!-- Contact -->
+							<article id="contact">
+								<h2 class="major">Contact</h2>
+								<form method="post" action="#">
+									<div class="field half first">
+										<label for="name">Name</label>
+										<input type="text" name="name" id="name" />
+									</div>
+									<div class="field half">
+										<label for="email">Email</label>
+										<input type="text" name="email" id="email" />
+									</div>
+									<div class="field">
+										<label for="message">Message</label>
+										<textarea name="message" id="message" rows="4"></textarea>
+									</div>
+									<ul class="actions">
+										<li><input type="submit" value="Send Message" class="special" /></li>
+										<li><input type="reset" value="Reset" /></li>
+									</ul>
+								</form>
+								<ul class="icons">
+									<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
+									<li><a href="#" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
+									<li><a href="#" class="icon fa-instagram"><span class="label">Instagram</span></a></li>
+									<li><a href="#" class="icon fa-github"><span class="label">GitHub</span></a></li>
+								</ul>
+							</article>
 
-            window.addEventListener('keydown', function (e) {
-              e.preventDefault();
-              myGameArea.keys = (myGameArea.keys || []);
-              myGameArea.keys[e.keyCode] = (e.type == "keydown");
-            })
-            window.addEventListener('keyup', function (e) {
-              myGameArea.keys[e.keyCode] = (e.type == "keydown");
-            })
-          },
+						<!-- Elements -->
+							<article id="elements">
+								<h2 class="major">Elements</h2>
 
-          stop : function() {
-            //clearInterval(this.interval);
-            window.cancelAnimationFrame(updateGameArea);
+								<section>
+									<h3 class="major">Text</h3>
+									<p>This is <b>bold</b> and this is <strong>strong</strong>. This is <i>italic</i> and this is <em>emphasized</em>.
+									This is <sup>superscript</sup> text and this is <sub>subscript</sub> text.
+									This is <u>underlined</u> and this is code: <code>for (;;) { ... }</code>. Finally, <a href="#">this is a link</a>.</p>
+									<hr />
+									<h2>Heading Level 2</h2>
+									<h3>Heading Level 3</h3>
+									<h4>Heading Level 4</h4>
+									<h5>Heading Level 5</h5>
+									<h6>Heading Level 6</h6>
+									<hr />
+									<h4>Blockquote</h4>
+									<blockquote>Fringilla nisl. Donec accumsan interdum nisi, quis tincidunt felis sagittis eget tempus euismod. Vestibulum ante ipsum primis in faucibus vestibulum. Blandit adipiscing eu felis iaculis volutpat ac adipiscing accumsan faucibus. Vestibulum ante ipsum primis in faucibus lorem ipsum dolor sit amet nullam adipiscing eu felis.</blockquote>
+									<h4>Preformatted</h4>
+									<pre><code>i = 0;
 
-          },
+while (!deck.isInOrder()) {
+    print 'Iteration ' + i;
+    deck.shuffle();
+    i++;
+}
 
-          clear : function() {
-            this.context.clearRect(0,0, this.canvas.width, this.canvas.height);
-          }
-        }
+print 'It took ' + i + ' iterations to sort the deck.';</code></pre>
+								</section>
 
-        socket.onerror = function(error) {
-          connectCounter++;
-          if(connectCounter >= 20) {
-            console.log('websockenerror ' + error);
-          } else {
-            connect();
-          }
-        }
-        //this updates the list of all tanks on the battlefield
-        socket.onmessage = function(message) {
-          var data = JSON.parse(message.data);
-          switch (data.pckid) {
-            case 1:
-              pcid = data.id;
-              firstX = data.x;
-              firstY = data.y;
-              break;
-            case 2:
-              //updates the list of tanks with all the info
-              tankList = data.tanks;
-              break;
-            case 3:
-              myGameArea.stop();
-              break;
-            case 4:
-              //updates the list of bullets with all the info
-              bulletList = data.bullets;
-              break;
-            default:
+								<section>
+									<h3 class="major">Lists</h3>
 
-          }
-          console.log('Server: ' + message.data);
-        }
-        //connects to the server
-        function connect() {
-          var tempSocket = new WebSocket("ws://192.168.178.30:3000");
-          return tempSocket;
-        }
-        //this sends your position to the server
-        function sendText() {
-          //sends all the relevant info of your tank to the server
-          var msg = {
-            pckid: 10,
-            id: pcid,
-            x: myTank.x,
-            y: myTank.y,
-            ang: myTank.angle
-          }
-          finalMsg = JSON.stringify(msg);
-          return finalMsg;
-        }
-        //this function updates the game while its running
-        function updateGameArea() {
-          myGameArea.clear();
-          myTank.moveAngle = 0;
-          myTank.speed = 0;
-          //all the possible key presses
-          if (myGameArea.keys && (myGameArea.keys[37] || myGameArea.keys[65])) {myTank.rotateRight();}
-          if (myGameArea.keys && (myGameArea.keys[39] || myGameArea.keys[68])) {myTank.rotateLeft();}
-          if (myGameArea.keys && (myGameArea.keys[38] || myGameArea.keys[87])) {myTank.moveForward();}
-          if (myGameArea.keys && (myGameArea.keys[40] || myGameArea.keys[83])) {myTank.moveBackward();}
-          if (myGameArea.keys && (myGameArea.keys[86] || myGameArea.keys[32])) {shot();}
-          //draws all the bullets
-          for(var i = 0; i < bulletList.length; i++) {
-            drawBullet(bulletList[i].x, bulletList[i].y, bulletList[i].ang);
-          }
-          //moves your tank
-          myTank.newPos();
-          //draws the positions of all the tanks
-          for(var i = 0;i < tankList.length; i++) {
-            drawTank(tankList[i].id, tankList[i].x, tankList[i].y, tankList[i].ang);
-          }
-          //updates the image
-          window.requestAnimationFrame(updateGameArea);
-        }
-        //this function describes the tank
-        function tank(width, height, color, x, y, topSpeed, topRotSpeed) {
-          this.width = width;
-          this.height = height;
+									<h4>Unordered</h4>
+									<ul>
+										<li>Dolor pulvinar etiam.</li>
+										<li>Sagittis adipiscing.</li>
+										<li>Felis enim feugiat.</li>
+									</ul>
 
-          this.x = x;
-          this.y = y;
+									<h4>Alternate</h4>
+									<ul class="alt">
+										<li>Dolor pulvinar etiam.</li>
+										<li>Sagittis adipiscing.</li>
+										<li>Felis enim feugiat.</li>
+									</ul>
 
-          this.speed = 0;
-          this.angle = 0;
+									<h4>Ordered</h4>
+									<ol>
+										<li>Dolor pulvinar etiam.</li>
+										<li>Etiam vel felis viverra.</li>
+										<li>Felis enim feugiat.</li>
+										<li>Dolor pulvinar etiam.</li>
+										<li>Etiam vel felis lorem.</li>
+										<li>Felis enim et feugiat.</li>
+									</ol>
+									<h4>Icons</h4>
+									<ul class="icons">
+										<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
+										<li><a href="#" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
+										<li><a href="#" class="icon fa-instagram"><span class="label">Instagram</span></a></li>
+										<li><a href="#" class="icon fa-github"><span class="label">Github</span></a></li>
+									</ul>
 
-          this.moveAngle = 0;
-          this.topSpeed = topSpeed;
-          this.topRotSpeed = topRotSpeed;
+									<h4>Actions</h4>
+									<ul class="actions">
+										<li><a href="#" class="button special">Default</a></li>
+										<li><a href="#" class="button">Default</a></li>
+									</ul>
+									<ul class="actions vertical">
+										<li><a href="#" class="button special">Default</a></li>
+										<li><a href="#" class="button">Default</a></li>
+									</ul>
+								</section>
 
-          this.update = function() {
-            ctx = myGameArea.context;
-            ctx.save();
-            ctx.translate(this.x, this.y);
-            ctx.rotate(this.angle);
-            ctx.fillStyle = color;
-            ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
-            ctx.restore();
-          }
+								<section>
+									<h3 class="major">Table</h3>
+									<h4>Default</h4>
+									<div class="table-wrapper">
+										<table>
+											<thead>
+												<tr>
+													<th>Name</th>
+													<th>Description</th>
+													<th>Price</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>Item One</td>
+													<td>Ante turpis integer aliquet porttitor.</td>
+													<td>29.99</td>
+												</tr>
+												<tr>
+													<td>Item Two</td>
+													<td>Vis ac commodo adipiscing arcu aliquet.</td>
+													<td>19.99</td>
+												</tr>
+												<tr>
+													<td>Item Three</td>
+													<td> Morbi faucibus arcu accumsan lorem.</td>
+													<td>29.99</td>
+												</tr>
+												<tr>
+													<td>Item Four</td>
+													<td>Vitae integer tempus condimentum.</td>
+													<td>19.99</td>
+												</tr>
+												<tr>
+													<td>Item Five</td>
+													<td>Ante turpis integer aliquet porttitor.</td>
+													<td>29.99</td>
+												</tr>
+											</tbody>
+											<tfoot>
+												<tr>
+													<td colspan="2"></td>
+													<td>100.00</td>
+												</tr>
+											</tfoot>
+										</table>
+									</div>
 
-          this.newPos = function() {
+									<h4>Alternate</h4>
+									<div class="table-wrapper">
+										<table class="alt">
+											<thead>
+												<tr>
+													<th>Name</th>
+													<th>Description</th>
+													<th>Price</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>Item One</td>
+													<td>Ante turpis integer aliquet porttitor.</td>
+													<td>29.99</td>
+												</tr>
+												<tr>
+													<td>Item Two</td>
+													<td>Vis ac commodo adipiscing arcu aliquet.</td>
+													<td>19.99</td>
+												</tr>
+												<tr>
+													<td>Item Three</td>
+													<td> Morbi faucibus arcu accumsan lorem.</td>
+													<td>29.99</td>
+												</tr>
+												<tr>
+													<td>Item Four</td>
+													<td>Vitae integer tempus condimentum.</td>
+													<td>19.99</td>
+												</tr>
+												<tr>
+													<td>Item Five</td>
+													<td>Ante turpis integer aliquet porttitor.</td>
+													<td>29.99</td>
+												</tr>
+											</tbody>
+											<tfoot>
+												<tr>
+													<td colspan="2"></td>
+													<td>100.00</td>
+												</tr>
+											</tfoot>
+										</table>
+									</div>
+								</section>
 
-            this.angle += this.moveAngle * Math.PI / 180;
+								<section>
+									<h3 class="major">Buttons</h3>
+									<ul class="actions">
+										<li><a href="#" class="button special">Special</a></li>
+										<li><a href="#" class="button">Default</a></li>
+									</ul>
+									<ul class="actions">
+										<li><a href="#" class="button">Default</a></li>
+										<li><a href="#" class="button small">Small</a></li>
+									</ul>
+									<ul class="actions">
+										<li><a href="#" class="button special icon fa-download">Icon</a></li>
+										<li><a href="#" class="button icon fa-download">Icon</a></li>
+									</ul>
+									<ul class="actions">
+										<li><span class="button special disabled">Disabled</span></li>
+										<li><span class="button disabled">Disabled</span></li>
+									</ul>
+								</section>
 
-            this.x += this.speed * Math.sin(this.angle);
-            this.y -= this.speed * Math.cos(this.angle);
-            //this limits the tank to the current canvas
-            if(this.x >= myGameArea.canvas.width) {
-              this.x = myGameArea.canvas.width;
-            }
-            if(this.x <= 0) {
-              this.x = 0;
-            }
-            if(this.y >= myGameArea.canvas.height) {
-              this.y = myGameArea.canvas.height;
-            }
-            if(this.y <= 0) {
-              this.y = 0;
-            }
-          }
-          //the four different movment functions
-          this.moveForward = function() {
-            this.speed = this.topSpeed;
-          }
-          this.moveBackward = function() {
-            this.speed = -this.topSpeed
-          }
-          this.rotateLeft = function() {
-            this.moveAngle = this.topRotSpeed;
-          }
-          this.rotateRight = function() {
-            this.moveAngle = -this.topRotSpeed;
-          }
-        }
-        //this function describes your shot
-        function shot() {
+								<section>
+									<h3 class="major">Form</h3>
+									<form method="post" action="#">
+										<div class="field half first">
+											<label for="demo-name">Name</label>
+											<input type="text" name="demo-name" id="demo-name" value="" placeholder="Jane Doe" />
+										</div>
+										<div class="field half">
+											<label for="demo-email">Email</label>
+											<input type="email" name="demo-email" id="demo-email" value="" placeholder="jane@untitled.tld" />
+										</div>
+										<div class="field">
+											<label for="demo-category">Category</label>
+											<div class="select-wrapper">
+												<select name="demo-category" id="demo-category">
+													<option value="">-</option>
+													<option value="1">Manufacturing</option>
+													<option value="1">Shipping</option>
+													<option value="1">Administration</option>
+													<option value="1">Human Resources</option>
+												</select>
+											</div>
+										</div>
+										<div class="field half first">
+											<input type="radio" id="demo-priority-low" name="demo-priority" checked>
+											<label for="demo-priority-low">Low</label>
+										</div>
+										<div class="field half">
+											<input type="radio" id="demo-priority-high" name="demo-priority">
+											<label for="demo-priority-high">High</label>
+										</div>
+										<div class="field half first">
+											<input type="checkbox" id="demo-copy" name="demo-copy">
+											<label for="demo-copy">Email me a copy</label>
+										</div>
+										<div class="field half">
+											<input type="checkbox" id="demo-human" name="demo-human" checked>
+											<label for="demo-human">Not a robot</label>
+										</div>
+										<div class="field">
+											<label for="demo-message">Message</label>
+											<textarea name="demo-message" id="demo-message" placeholder="Enter your message" rows="6"></textarea>
+										</div>
+										<ul class="actions">
+											<li><input type="submit" value="Send Message" class="special" /></li>
+											<li><input type="reset" value="Reset" /></li>
+										</ul>
+									</form>
+								</section>
 
-            socket.send(JSON.stringify({
-                                      pckid: 11,
-                                      id: pcid}
-                                    ));
-        }
-        //draws a single bullet
-        function drawBullet(x, y, ang) {
+							</article>
 
-              ctx = myGameArea.context;
-              ctx.save();
-              ctx.translate(x, y);
-              ctx.rotate(ang * Math.PI / 180);
-              ctx.fillStyle = "green";
-              ctx.fillRect(5 / -2, 7 / -2, 5, 7);
-              ctx.restore();
-        }
-        //draws a single tank
-        function drawTank(id, x, y, ang) {
-          ctx = myGameArea.context;
-          ctx.save();
-          ctx.translate(x, y);
-          ctx.rotate(ang * Math.PI / 180);
+					</div>
 
-          if (id == pcid) {
-            ctx.fillStyle = "blue";
-          } else {
-            ctx.fillStyle = "red";
-          }
-          ctx.fillRect(20 / -2, 25 / -2, 20, 25);
-          ctx.restore();
-        }
+				<!-- Footer -->
+					<footer id="footer">
+						<p class="copyright">&copy; TANKY 2017 | Made with ♥ KITank | Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+					</footer>
 
-    </script>
-    <P>dank tanks fighting each other until one explodes  \m/(>.<)\m/ </p>
-    <P>TODO: hitboxes, walls and other objects, adding sprites, gameworld borders, objective, manual ip input(dedicated servers possible??)</p>
-  </body>
+			</div>
+
+		<!-- BG -->
+			<div id="bg"></div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/skel.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
 </html>
