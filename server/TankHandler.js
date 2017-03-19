@@ -96,8 +96,10 @@ TankHandler.prototype.setData = function(data) {
     if (this.id == -1)
         return;
 
-    this.x = this.limit(data.x, 0, this.server.config.map_width);
-    this.y = this.limit(data.y, 0, this.server.config.map_height);
+    //this.x = this.limit(data.x, 0, this.server.config.map_width);
+    //this.y = this.limit(data.y, 0, this.server.config.map_height);
+    this.x = data.x;
+    this.y = data.y;
     this.ang = this.map(data.ang, 0, 360);
     
     // update time
