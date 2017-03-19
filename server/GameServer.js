@@ -133,6 +133,7 @@ GameServer.prototype.loop = function() {
         bullet.update(dt);
     }.bind(this));
 
+    // bullet-bullet collision
     this.bullets.forEach(function(bullet) {
         this.bullets.forEach(function(other) {
             if (bullet.getId() == other.getId())
@@ -146,6 +147,7 @@ GameServer.prototype.loop = function() {
         }.bind(this));
     }.bind(this));
 
+    // inactivity kick
     this.clients.forEach(function(client) {
         if (now - client.handler.getLastUpdate() > this.config.server_kick_after) {
             var id = client.handler.getId();
@@ -155,6 +157,7 @@ GameServer.prototype.loop = function() {
         }
     }.bind(this));
 
+    // tank-tank collision
     this.clients.forEach(function(client) {
         this.clients.forEach(function(other) {
             if (client.handler.getId() == other.handler.getId())
@@ -162,7 +165,17 @@ GameServer.prototype.loop = function() {
 
             if (this.circleCircleCollision(client.handler.x, client.handler.y, client.handler.width,
                                            other.handler.x, other.handler.y, other.handler.width)) {
-                console.log("tank hit");
+                console.log("tank-tank hit");
+            }
+        }.bind(this));
+    }.bind(this));
+
+    // tank-bullet hit
+    this.clients.forEach(function(client) {
+        this.bullets.forEach(function(bullet) {
+            if (this.circleCircleCollision(client.handler.x, client.handler.y, client.handler.width,
+                                           bullet.x, bullet.y, bullet.radius)) {
+                console.log("bullet-tank hit");
             }
         }.bind(this));
     }.bind(this));
@@ -307,9 +320,9 @@ GameServer.prototype.getRandomPosition = function() {
 }
 
 GameServer.prototype.circleCircleCollision = function(x1, y1, r1, x2, y2, r2) {
-    return this.getDistance(x1, y1, x2, y2) <= r1 + r2;
+    return this.getDistance(x1, y1, x2, y2) <= (r1 + r2) * (r1 + r2);
 }
 
 GameServer.prototype.getDistance = function(x1, y1, x2, y2) {
-    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+    return Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2);
 }

@@ -31,7 +31,6 @@
         document.addEventListener("DOMContentLoaded", function() {
         var canvas = document.getElementById("canvas");
         var ctx = canvas.getContext("2d");
-        canvas.style.cursor = "none";
 
         var socket = new WebSocket("ws://192.168.178.30:3000");
         var uuid = -1;
@@ -70,7 +69,8 @@
                 id: uuid,
                 x: tank.x,
                 y: tank.y,
-                ang: tank.angle / Math.PI * 180
+                ang: tank.angle / Math.PI * 180,
+                tur: tank.turretAngle / Math.PI * 180
               }))
             }, 16);
 
@@ -137,7 +137,7 @@
           var now = Date.now();
           var dt = now - lastFrame;
 
-          console.log(dt);
+          //console.log(dt);
 
           tank.moveAngle = 0;
           tank.speed = 0;
@@ -155,7 +155,7 @@
           tank.update(dt);
 
           for(var i = 0;i < tankList.length; i++) {
-            drawTank(tankList[i].id, tankList[i].x, tankList[i].y, tankList[i].ang);
+            drawTank(tankList[i].id, tankList[i].x, tankList[i].y, tankList[i].ang, tankList[i].tur);
           }
 
           lastFrame = now;
@@ -256,10 +256,10 @@
           }
           ctx.fillRect(ratioX*(-10), ratioY*(-12), ratioX*(20), ratioY*(24));
 
-          ctx.moveTo(canvasX, canvasY);
+          /*ctx.moveTo(canvasX, canvasY);
           ctx.lineTo(5* Math.sin(tur),
                      5* Math.cos(tur));
-          ctx.stroke();
+          ctx.stroke();*/
 
           ctx.restore();
         }
@@ -279,7 +279,8 @@
         window.addEventListener('mousemove', function (e) {
             cursorX = e.pageX;
             cursorY = e.pageY;
-      });
+          });
+        });
 
     </script>
   </body>
