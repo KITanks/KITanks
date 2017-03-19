@@ -185,7 +185,7 @@ TankHandler.prototype.respawn = function(pos, ang, tur) {
     this.ang = ang;
     this.tur = tur;
 
-    client.send(JSON.stringify({
+    this.client.send(JSON.stringify({
         pckid: 5,
         x: this.x,
         y: this.y,
