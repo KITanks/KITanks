@@ -55,6 +55,8 @@
         var tank = null;
         var tankList = [];
         var bulletList = [];
+        var explosionList = [];
+        var mineList = [];
         var MAP_WIDTH = 2000;
         var MAP_HEIGHT = 1000;
         var scoreList = [];
@@ -118,6 +120,7 @@
               bulletList = data.bullets;
               break;
             case 5:
+              console.log("paket");
               tank.x = data.x;
               tank.y = data.y;
               tank.angle = data.ang;
@@ -125,7 +128,12 @@
               tank.score = data.scr;
               break;
             case 6:
+              console.log("data");
               explosion(data.x, data.y);
+              break;
+            case 7:
+              console.log("bbbbooom?");
+              mineList = data.mines;
               break;
             default:
               break;
@@ -149,6 +157,9 @@
           tank.moveAngle = 0;
           tank.speed = 0;
           tank.moveTurretAngle = 0;
+
+          //explosion(1000,500);
+
           if (Game.keys && (Game.keys[39])) { tank.rotTurrRight(); }
           if (Game.keys && (Game.keys[37])) { tank.rotTurrLeft(); }
           if (Game.keys && (Game.keys[65])) { tank.rotateRight(); }
@@ -164,6 +175,14 @@
             drawTank(tankList[i].id, tankList[i].x, tankList[i].y, tankList[i].ang, tankList[i].tur);
           }
           updateScoreList();
+          for(var i = 0;i < mineList.length; i++) {
+            drawMine(mineList[i].x, mineList[i].y);
+          }
+          for(var i = 0;i < explosionList.length; i++) {
+            if(now - explosionList[i].date < 500) {
+              drawExplosion(explosionList[i].x, explosionList[i].y);
+            }
+          }
           lastFrame = now;
           window.requestAnimationFrame(gameLoop);
         }
@@ -301,18 +320,51 @@
             var row = scores.insertRow(scores.rows.length);
             var cell = row.insertCell(0);
             cell.innerHTML = "#" + scoreTankList[i].id + ": " + scoreTankList[i].scr;
-            console.log("score of #" + scoreTankList[i].id + ": " + scoreTankList[i].scr);
+          //  console.log("score of #" + scoreTankList[i].id + ": " + scoreTankList[i].scr);
           }
         }
-        function explosion(x, y) {
+        function drawExplosion(x, y) {
+          var canvasX = (x / MAP_WIDTH) * canvas.width;
+          var canvasY = (y / MAP_HEIGHT) * canvas.height;
           ctx.save();
-          ctx.translate(x, y);
+          ctx.translate(canvasX, canvasY);
           ctx.beginPath();
-          ctx.arc(0, 0, 5 ,0, 2*Math.PI);
-            ctx.fillStyle = "#00004d";
+          ctx.arc(0, 0, 40, 0, 2*Math.PI, false);
+          ctx.fillStyle = "#ffffff";
           ctx.fill();
           ctx.restore();
+          currentTime = Date.now();
+
+          console.log("olle");
         }
+        function explosion(x, y) {
+          currentTime = Date.now();
+          explosionList.push({x:x, y:y , date: currentTime});
+          drawExplosion(x ,y);
+        }
+        function mine(x, y) {
+          this.x = x;
+          this.y = y;
+        }
+        function drawMine(x, y) {
+            var canvasX = (x / MAP_WIDTH) * canvas.width;
+            var canvasY = (y / MAP_HEIGHT) * canvas.height;
+            var ratioX = canvas.width/MAP_WIDTH;
+            var ratioY = canvas.height/MAP_HEIGHT;
+
+            ctx.save();
+            ctx.translate(canvasX, canvasY);
+            ctx.fillStyle = "black"
+            ctx.fillRect(ratioX * -7, ratioY * 7, ratioX * 14, ratioY * -14);
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(canvasX, canvasY);
+            ctx.fillStyle = "yellow"
+            ctx.fillRect(ratioX * -5, ratioY * 5, ratioX * 10, ratioY * -10);
+            ctx.restore();
+        }
+
         window.addEventListener("resize", resize);
         window.addEventListener('mousemove', function (e) {
             cursorX = e.pageX;
