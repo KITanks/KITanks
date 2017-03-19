@@ -6,7 +6,7 @@ function Mine(server, id, pos) {
     this.x = pos.x;
     this.y = pos.y;
 
-    this.radius = 40;
+    this.radius = 20;
 }
 
 module.exports = Mine;

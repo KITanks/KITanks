@@ -47,7 +47,7 @@ function GameServer(port) {
         server_bullet_interval: 1000, // one bullet every # ms
         map_width: 2000,              // width units
         map_height: 1000,             // height units
-        map_mine_count: 20            // initial mine count
+        map_mine_count: 10            // initial mine count
     }
 }
 
@@ -212,6 +212,7 @@ GameServer.prototype.loop = function() {
     this.clients.forEach(function(client) {
         if (client.readyState !== WebSocket.OPEN)
             return;
+
         client.send(tankData);
         client.send(bulletData);
         client.send(mineData);
