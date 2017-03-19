@@ -32,6 +32,8 @@ function TankHandler(server, client) {
 
     // time of last bullet
     this.lastBulletShot = 0;
+
+    this.score = 0;
 }
 
 module.exports = TankHandler;
@@ -90,7 +92,8 @@ TankHandler.prototype.getData = function() {
         x: this.x,
         y: this.y,
         ang: this.ang,
-        tur: this.tur
+        tur: this.tur,
+        scr: this.score
     }
 }
 
@@ -168,7 +171,7 @@ TankHandler.prototype.spawnBullet = function() {
     var bulletX = this.x + this.offset * Math.sin(this.tur * Math.PI / 180);
     var bulletY = this.y + this.offset * -Math.cos(this.tur * Math.PI / 180);
 
-    this.server.spawnBullet(bulletX, bulletY, this.tur);
+    this.server.spawnBullet(this.client, bulletX, bulletY, this.tur);
     this.lastBulletShot = now;
 }
 
@@ -184,12 +187,18 @@ TankHandler.prototype.respawn = function(pos, ang, tur) {
     this.y = pos.y;
     this.ang = ang;
     this.tur = tur;
+    this.score = 0;
 
     this.client.send(JSON.stringify({
         pckid: 5,
         x: this.x,
         y: this.y,
         ang: this.ang,
-        tur: this.tur
+        tur: this.tur,
+        scr: this.score
     }));
+}
+
+TankHandler.prototype.addScore = function(score) {
+    this.score += score;
 }

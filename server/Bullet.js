@@ -1,5 +1,6 @@
-function Bullet(server, id, x, y, ang) {
+function Bullet(server, tank, id, x, y, ang) {
     this.server = server;
+    this.tank = tank;
 
     this.id = id;
     this.x = x;
@@ -35,4 +36,8 @@ Bullet.prototype.getData = function() {
         y: this.y,
         ang: this.ang
     }
+}
+
+Bullet.prototype.getShooter = function() {
+    return this.tank;
 }

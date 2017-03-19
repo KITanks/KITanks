@@ -176,6 +176,9 @@ GameServer.prototype.loop = function() {
         this.bullets.forEach(function(bullet) {
             if (this.circleCircleCollision(client.handler.x, client.handler.y, client.handler.width,
                                            bullet.x, bullet.y, bullet.radius)) {
+                var shooter = bullet.getShooter();
+                shooter.handler.addScore(1);
+
                 this.removeBullet(bullet.getId());
                 this.respawnTank(client);
             }
@@ -225,8 +228,8 @@ GameServer.prototype.removeBullet = function(id) {
     }
 }
 
-GameServer.prototype.spawnBullet = function(x, y, ang) {
-    var bullet = new Bullet(this, this.getUniqueBulletId(), x, y, ang);
+GameServer.prototype.spawnBullet = function(tank, x, y, ang) {
+    var bullet = new Bullet(this, tank, this.getUniqueBulletId(), x, y, ang);
     this.bullets.push(bullet);
 }
 
