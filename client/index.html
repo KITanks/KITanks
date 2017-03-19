@@ -7,6 +7,12 @@
         border:1px solid #d3d3d3;
         background-color: #f1f1f1;
       }
+      html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0px;
+        border: 0;
+      }
     </style>
   </head>
     <body>
@@ -20,15 +26,16 @@
         var pcid;
         //al list of all enemy Tanks
         var tankList = [];
-        //you own very special tank boii
-        var myTank;
+
+        var fistX;
+
+        var firstY;
         //a list of all bullets in the air
         var bulletList = [];
         //this method is executes at the start of every game
         socket.onopen = function() {
           socket.send('ping_pong');
           connectCounter = 0;
-          myTank = new tank(20, 20, "yellow",100 , 100, 1, 2);
           myGameArea.start();
         }
         //this variable describes the battlefield
@@ -38,15 +45,16 @@
           start : function() {
 
             //the dimensions of the battlefield
-            this.canvas.width = 600;
-            this.canvas.height = 400;
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerWidth / 2;
+
 
             this.context = this.canvas.getContext("2d");
             document.body.insertBefore(this.canvas, document.body.childNodes[0]);
             this.frameNo = 0;
 
-            window.requestAnimationFrame(updateGameArea);
-            //DONT TOUCH
+            myTank = new tank(30, 30, "black",firstX , firstY, 1, 2);
+
             this.interval = setInterval(function () {
                 	                 socket.send(
                                       JSON.stringify({
@@ -58,6 +66,9 @@
                                       }
                                         , 16);
                                         //DONT TOUCH
+                                        //DONT TOUCH
+
+            window.requestAnimationFrame(updateGameArea);
 
             window.addEventListener('keydown', function (e) {
               e.preventDefault();
@@ -94,6 +105,8 @@
           switch (data.pckid) {
             case 1:
               pcid = data.id;
+              firstX = data.x;
+              firstY = data.y;
               break;
             case 2:
               //updates the list of tanks with all the info
@@ -168,16 +181,6 @@
           this.topSpeed = topSpeed;
           this.topRotSpeed = topRotSpeed;
 
-          this.update = function() {
-            ctx = myGameArea.context;
-            ctx.save();
-            ctx.translate(this.x, this.y);
-            ctx.rotate(this.angle);
-            ctx.fillStyle = color;
-            ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
-            ctx.restore();
-          }
-
           this.newPos = function() {
 
             this.angle += this.moveAngle * Math.PI / 180;
@@ -248,7 +251,7 @@
         }
 
     </script>
-    <P>shits not working man :(</p>
+    <P>dank tanks fighting each other until one explodes  \m/(>.<)\m/ </p>
     <P>TODO: hitboxes, walls and other objects, adding sprites, gameworld borders, objective, manual ip input(dedicated servers possible??)</p>
   </body>
 </html>
