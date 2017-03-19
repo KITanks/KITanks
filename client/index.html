@@ -260,8 +260,17 @@
           var ratioX = canvas.width/MAP_WIDTH;
           var ratioY = canvas.height/MAP_HEIGHT;
 
-          ctx.save();
 
+          //tank chains
+          ctx.save();
+          ctx.translate(canvasX, canvasY);
+          ctx.rotate(ang * Math.PI / 180);
+          ctx.fillStyle = "black";
+          ctx.fillRect(ratioX*(-13), ratioY*(-10), ratioX*(26), ratioY*(20));
+          ctx.restore();
+
+          //tank body
+          ctx.save();
           ctx.translate(canvasX, canvasY);
           ctx.rotate(ang * Math.PI / 180);
           if (id == uuid) {
@@ -269,9 +278,18 @@
           } else {
             ctx.fillStyle = "red";
           }
-          ctx.fillRect(ratioX*(-10), ratioY*(-12), ratioX*(20), ratioY*(24));
+          ctx.fillRect(ratioX*(-10), ratioY*(-13), ratioX*(20), ratioY*(26));
           ctx.restore();
 
+          //yellow front marker
+          ctx.save();
+          ctx.translate(canvasX, canvasY);
+          ctx.rotate(ang * Math.PI / 180);
+          ctx.fillStyle = "#00ff00";
+          ctx.fillRect(ratioX*(-5), ratioY*(-14), ratioX*(10), ratioY*(4));
+          ctx.restore();
+
+          //citcle thingy on turret
           ctx.save();
           ctx.translate(canvasX, canvasY);
           ctx.rotate(tur * Math.PI / 180);
@@ -285,11 +303,12 @@
           ctx.fill();
           ctx.restore();
 
+          //turret
           ctx.save();
           ctx.translate(canvasX, canvasY);
           ctx.rotate(tur * Math.PI / 180);
           ctx.fillStyle = "black"
-          ctx.fillRect(ratioX * -3, ratioY * 0, ratioX * 6, ratioY * -30);
+          ctx.fillRect(ratioX * -3, ratioY * 0, ratioX * 6, ratioY * -26);
           ctx.restore();
         }
 
