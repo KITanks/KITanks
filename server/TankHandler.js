@@ -23,9 +23,10 @@ function TankHandler(server, client) {
     this.x = pos.x;
     this.y = pos.y;
     this.ang = 90;
+    this.tur = 90;
 
-    this.width = 20;
-    this.length = 24;
+    this.width = 16;
+    this.length = 20;
 
     // time of last bullet
     this.lastBulletShot = 0;
@@ -86,7 +87,8 @@ TankHandler.prototype.getData = function() {
         id: this.id,
         x: this.x,
         y: this.y,
-        ang: this.ang
+        ang: this.ang,
+        tur: this.tur
     }
 }
 
@@ -104,6 +106,7 @@ TankHandler.prototype.setData = function(data) {
     this.x = data.x;
     this.y = data.y;
     this.ang = this.map(data.ang, 0, 360);
+    this.tur = this.map(data.tur, 0, 360);
     
     // update time
     this.lastUpdate = Date.now();
@@ -112,7 +115,7 @@ TankHandler.prototype.setData = function(data) {
 TankHandler.prototype.limit = function(val, min, max) {
     if (val < min)
         return min;
-    else if(val > max)
+    else if (val > max)
         return max;
     else
         return val;
@@ -141,9 +144,10 @@ TankHandler.prototype.handleMessage = function(data) {
         case 10:
             if (!data.hasOwnProperty("x")
              || !data.hasOwnProperty("y")
-             || !data.hasOwnProperty("ang"))
+             || !data.hasOwnProperty("ang")
+             || !data.hasOwnProperty("tur"))
                 break;
-            this.setData({x: data.x, y: data.y, ang: data.ang});
+            this.setData({x: data.x, y: data.y, ang: data.ang, tur: data.tur});
             break;
         case 11:
             this.spawnBullet();

@@ -155,6 +155,18 @@ GameServer.prototype.loop = function() {
         }
     }.bind(this));
 
+    this.clients.forEach(function(client) {
+        this.clients.forEach(function(other) {
+            if (client.handler.getId() == other.handler.getId())
+                return;
+
+            if (this.circleCircleCollision(client.handler.x, client.handler.y, client.handler.width,
+                                           other.handler.x, other.handler.y, other.handler.width)) {
+                console.log("tank hit");
+            }
+        }.bind(this));
+    }.bind(this));
+
     // build data
     var bulletData = this.getBulletData();
     var tankData = this.getTankData();
