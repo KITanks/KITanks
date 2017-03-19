@@ -21,16 +21,30 @@
         font-size: 20px;
         color: red;
       }
+
+      #table {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
     </style>
   </head>
     <body>
       <canvas id="canvas"></canvas>
+      <div id="table">
+        <table id="scores" border="0">
+          <tr><td>Text 1</td></tr>
+          <tr><td>Text 2</td></tr>
+        </table>
+      </div>
       <div id="info"></div>
 
       <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function() {
         var canvas = document.getElementById("canvas");
         var ctx = canvas.getContext("2d");
+
+        var scores = document.getElementById("scores");
 
         var socket = new WebSocket("ws://192.168.178.30:3000");
         var uuid = -1;
@@ -165,6 +179,13 @@
 
           for(var i = 0;i < tankList.length; i++) {
             drawTank(tankList[i].id, tankList[i].x, tankList[i].y, tankList[i].ang, tankList[i].tur);
+          }
+
+          for (var i = 0; i < tankList.length; i++) {
+            scores.innerHTML = "";
+            var row = scores.insertRow(0);
+            var cell = row.insertCell(0);
+            cell.innerHTML = "#" + tankList[i].id + ": " + tankList[i].scr;
           }
 
           lastFrame = now;
