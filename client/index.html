@@ -264,7 +264,6 @@
 
           ctx.translate(canvasX, canvasY);
           ctx.rotate(ang * Math.PI / 180);
-
           if (id == uuid) {
             ctx.fillStyle = "blue";
           } else {
@@ -276,8 +275,21 @@
           ctx.save();
           ctx.translate(canvasX, canvasY);
           ctx.rotate(tur * Math.PI / 180);
+          ctx.beginPath();
+          ctx.arc(0, 0, 5 ,0, 2*Math.PI);
+          if(id == uuid) {
+            ctx.fillStyle = "#00004d";
+          } else {
+            ctx.fillstyle = "#cc0000"
+          }
+          ctx.fill();
+          ctx.restore();
+
+          ctx.save();
+          ctx.translate(canvasX, canvasY);
+          ctx.rotate(tur * Math.PI / 180);
           ctx.fillStyle = "black"
-          ctx.fillRect(ratioX * -4, ratioY * 0, ratioX * 8, ratioY * -30);
+          ctx.fillRect(ratioX * -3, ratioY * 0, ratioX * 6, ratioY * -30);
           ctx.restore();
         }
 
