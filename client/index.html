@@ -127,10 +127,12 @@
         }
 
         function gameLoop() {
+          clear();
+
           var now = Date.now();
           var dt = now - lastFrame;
 
-          clear();
+          console.log(dt);
 
           tank.moveAngle = 0;
           tank.speed = 0;
