@@ -179,7 +179,17 @@ TankHandler.prototype.getAddress = function() {
     return this.address;
 }
 
-TankHandler.prototype.respawn = function(pos) {
+TankHandler.prototype.respawn = function(pos, ang, tur) {
     this.x = pos.x;
     this.y = pos.y;
+    this.ang = ang;
+    this.tur = tur;
+
+    client.send(JSON.stringify({
+        pckid: 5,
+        x: this.x,
+        y: this.y,
+        ang: this.ang,
+        tur: this.tur
+    }));
 }

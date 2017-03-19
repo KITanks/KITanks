@@ -53,14 +53,14 @@ module.exports = GameServer;
  */
 GameServer.prototype.start = function() {
     this.server = new WebSocket.Server({port: this.port}, function() {
-        this.log(LogType.INFO, "Server listening on port :" + this.port);
+        this.log(LogType.INFO, "Server listening on *:" + this.port);
     }.bind(this));
 
     // listener for incoming connections
     this.server.on("connection", onConnection.bind(this));
 
     function onClose() {
-        this.self.log(LogType.DEBUG, "Client #" + this.socket.handler.getId() + " lost connection");
+        this.self.log(LogType.DEBUG, "Dropped connection to client #" + this.socket.handler.getId());
 
         // remove client from array
         this.self.removeClient(this.socket.handler.getId());
@@ -165,7 +165,8 @@ GameServer.prototype.loop = function() {
 
             if (this.circleCircleCollision(client.handler.x, client.handler.y, client.handler.width,
                                            other.handler.x, other.handler.y, other.handler.width)) {
-                console.log("tank-tank hit");
+                this.respawnTank(client);
+                this.respawnTank(other);
             }
         }.bind(this));
     }.bind(this));
@@ -320,6 +321,10 @@ GameServer.prototype.getRandomPosition = function() {
     }
 }
 
+GameServer.prototype.getRandomAngle = function() {
+    return Math.floor(Math.random() * 360);
+}
+
 GameServer.prototype.circleCircleCollision = function(x1, y1, r1, x2, y2, r2) {
     return this.getDistance(x1, y1, x2, y2) <= (r1 + r2) * (r1 + r2);
 }
@@ -330,11 +335,5 @@ GameServer.prototype.getDistance = function(x1, y1, x2, y2) {
 
 GameServer.prototype.respawnTank = function(client) {
     var pos = this.getRandomPosition();
-    client.handler.respawn(pos);
-
-    client.send(JSON.stringify({
-        pckid: 5,
-        x: pos.x,
-        y: pos.y
-    }));
+    client.handler.respawn(pos, this.getRandomAngle(), this.getRandomAngle());
 }
