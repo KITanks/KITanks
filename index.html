@@ -36,6 +36,7 @@
         socket.onopen = function() {
           socket.send('ping_pong');
           connectCounter = 0;
+          myTank = new tank(30, 30, "black",firstX , firstY, 1, 2);
           myGameArea.start();
         }
         //this variable describes the battlefield
@@ -45,16 +46,15 @@
           start : function() {
 
             //the dimensions of the battlefield
-            this.canvas.width = window.innerWidth;
-            this.canvas.height = window.innerWidth / 2;
-
+            this.canvas.width = 2000;
+            this.canvas.height = 1000;
 
             this.context = this.canvas.getContext("2d");
             document.body.insertBefore(this.canvas, document.body.childNodes[0]);
             this.frameNo = 0;
 
-            myTank = new tank(30, 30, "black",firstX , firstY, 1, 2);
-
+            window.requestAnimationFrame(updateGameArea);
+            //DONT TOUCH
             this.interval = setInterval(function () {
                 	                 socket.send(
                                       JSON.stringify({
@@ -66,9 +66,6 @@
                                       }
                                         , 16);
                                         //DONT TOUCH
-                                        //DONT TOUCH
-
-            window.requestAnimationFrame(updateGameArea);
 
             window.addEventListener('keydown', function (e) {
               e.preventDefault();
@@ -180,6 +177,16 @@
           this.moveAngle = 0;
           this.topSpeed = topSpeed;
           this.topRotSpeed = topRotSpeed;
+
+          this.update = function() {
+            ctx = myGameArea.context;
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle);
+            ctx.fillStyle = color;
+            ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
+            ctx.restore();
+          }
 
           this.newPos = function() {
 
