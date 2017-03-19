@@ -183,6 +183,12 @@ TankHandler.prototype.getAddress = function() {
 }
 
 TankHandler.prototype.respawn = function(pos, ang, tur) {
+    this.server.broadcast(JSON.stringify({
+        pckid: 6,
+        x: this.x,
+        y: this.y
+    }));
+
     this.x = pos.x;
     this.y = pos.y;
     this.ang = ang;

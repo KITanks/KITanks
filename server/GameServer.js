@@ -1,6 +1,7 @@
-var WebSocket = require("ws");
+var WebSocket   = require("ws");
 var TankHandler = require("./TankHandler.js");
-var Bullet = require("./Bullet.js");
+var Bullet      = require("./Bullet.js");
+var Mine        = require("./Mine.js");
 
 /**
  * Logging types for log function
@@ -35,6 +36,9 @@ function GameServer(port) {
     // next id to use
     this.bulletId = 0;
 
+    this.mines = [];
+    this.mineId = 0;
+
     // gameserver config
     this.config = {
         server_tickrate: 60,          // ticks per second
@@ -42,7 +46,8 @@ function GameServer(port) {
         server_kick_after: 1000,      // kick after # ms of inactivity
         server_bullet_interval: 1000, // one bullet every # ms
         map_width: 2000,              // width units
-        map_height: 1000              // height units
+        map_height: 1000,             // height units
+        map_mine_count: 20            // initial mine count
     }
 }
 
@@ -54,13 +59,16 @@ module.exports = GameServer;
 GameServer.prototype.start = function() {
     this.server = new WebSocket.Server({port: this.port}, function() {
         this.log(LogType.INFO, "Server listening on *:" + this.port);
+
+        for (var i = 0; i < this.config.map_mine_count; i++)
+            this.spawnMine();
     }.bind(this));
 
     // listener for incoming connections
     this.server.on("connection", onConnection.bind(this));
 
     function onClose() {
-        this.self.log(LogType.DEBUG, "Dropped connection to client #" + this.socket.handler.getId());
+        this.self.log(LogType.DEBUG, "Client #" + this.socket.handler.getId() + " dropped connection.");
 
         // remove client from array
         this.self.removeClient(this.socket.handler.getId());
@@ -147,6 +155,17 @@ GameServer.prototype.loop = function() {
         }.bind(this));
     }.bind(this));
 
+    // tank-mine collision
+    this.clients.forEach(function(client) {
+        this.mines.forEach(function(mine) {
+            if (this.circleCircleCollision(client.handler.x, client.handler.y, client.handler.width,
+                                           mine.x, mine.y, mine.radius)) {
+                this.respawnTank(client);
+                this.removeMine(mine.id);
+            }
+        }.bind(this));
+    }.bind(this));
+
     // inactivity kick
     this.clients.forEach(function(client) {
         if (now - client.handler.getLastUpdate() > this.config.server_kick_after) {
@@ -188,12 +207,14 @@ GameServer.prototype.loop = function() {
     // build data
     var bulletData = this.getBulletData();
     var tankData = this.getTankData();
+    var mineData = this.getMineData();
 
     this.clients.forEach(function(client) {
         if (client.readyState !== WebSocket.OPEN)
             return;
         client.send(tankData);
         client.send(bulletData);
+        client.send(mineData);
     });
 
     this.lastTick = now;
@@ -274,6 +295,18 @@ GameServer.prototype.getTankData = function() {
     });
 }
 
+GameServer.prototype.getMineData = function() {
+    var mines = [];
+    this.mines.forEach(function(mine) {
+        mines.push(mine.getData());
+    });
+
+    return JSON.stringify({
+        pckid: 7,
+        mines: mines
+    });
+}
+
 /**
  * Returns next unique id and increments it by one
  */
@@ -289,6 +322,13 @@ GameServer.prototype.getUniqueBulletId = function() {
 }
 
 /**
+ * Returns next unique id and increments it by one
+ */
+GameServer.prototype.getUniqueMineId = function() {
+    return this.mineId++;
+}
+
+/**
  * Removes client from storage
  *
  * @param {number} id - Player id
@@ -297,6 +337,13 @@ GameServer.prototype.removeClient = function(id) {
     for (var i = 0; i < this.clients.length; i++) {
         if (this.clients[i].handler.getId() == id)
             this.clients.splice(i, 1);
+    }
+}
+
+GameServer.prototype.removeMine = function(id) {
+    for (var i = 0; i < this.mines.length; i++) {
+        if (this.mines[i].id == id)
+            this.mines.splice(i, 1);
     }
 }
 
@@ -339,4 +386,9 @@ GameServer.prototype.getDistance = function(x1, y1, x2, y2) {
 GameServer.prototype.respawnTank = function(client) {
     var pos = this.getRandomPosition();
     client.handler.respawn(pos, this.getRandomAngle(), this.getRandomAngle());
+}
+
+GameServer.prototype.spawnMine = function() {
+    var mine = new Mine(this, this.getUniqueMineId(), this.getRandomPosition());
+    this.mines.push(mine);
 }
