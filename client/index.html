@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-ratio=1.0"/>
     <style>
       html, body {
         width: 100%;
@@ -217,17 +217,23 @@
           var canvasX = (x / MAP_WIDTH) * canvas.width;
           var canvasY = (y / MAP_HEIGHT) * canvas.height;
 
+          var ratioX = canvas.width/MAP_WIDTH;
+          var ratioY = canvas.height/MAP_HEIGHT;
+
           ctx.save();
           ctx.translate(canvasX, canvasY);
           ctx.rotate(ang * Math.PI / 180);
           ctx.fillStyle = "green";
-          ctx.fillRect(5 / -2, 7 / -2, 5, 7);
+          ctx.fillRect(ratioX*(5 / -2), ratioY*(7 / -2), ratioX*(5), ratioY*(7));
           ctx.restore();
         }
 
         function drawTank(id, x, y, ang) {
           var canvasX = (x / MAP_WIDTH) * canvas.width;
           var canvasY = (y / MAP_HEIGHT) * canvas.height;
+
+          var ratioX = canvas.width/MAP_WIDTH;
+          var ratioY = canvas.height/MAP_HEIGHT;
 
           ctx.save();
 
@@ -239,7 +245,7 @@
           } else {
             ctx.fillStyle = "red";
           }
-          ctx.fillRect(-10, -12, 20, 24);
+          ctx.fillRect(ratioX*(-10), ratioY*(-12), ratioX*(20), ratioY*(24));
 
           ctx.restore();
         }
