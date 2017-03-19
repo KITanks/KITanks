@@ -47,7 +47,7 @@
       <div id="table">
         <table id="scores" border="0"></table>
       </div>
-      <div id="info"></div>
+      <div id="info">
       <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function() {
         var canvas = document.getElementById("canvas");
@@ -64,6 +64,9 @@
 
         var MAP_WIDTH = 2000;
         var MAP_HEIGHT = 1000;
+
+        var scoreList = [];
+
 
         var lastFrame = Date.now();
 
@@ -191,12 +194,7 @@
             drawTank(tankList[i].id, tankList[i].x, tankList[i].y, tankList[i].ang, tankList[i].tur);
           }
 
-          scores.innerHTML = "";
-          for (var i = 0; i < tankList.length; i++) {
-            var row = scores.insertRow(scores.rows.length);
-            var cell = row.insertCell(0);
-            cell.innerHTML = "#" + tankList[i].id + ": " + tankList[i].scr;
-          }
+          updateScoreList();
 
           lastFrame = now;
 
@@ -352,6 +350,22 @@
         function resize() {
           canvas.width = window.innerWidth - 2;
           canvas.height = window.innerWidth / 2;
+        }
+
+        function updateScoreList() {
+
+          scoreTankList = tankList;
+          scoreTankList.sort(function(a, b) {
+            return a.score - b.score
+          })
+
+          scores.innerHTML = "";
+          for (var i = 0; i < scoreTankList.length; i++) {
+            var row = scores.insertRow(scores.rows.length);
+            var cell = row.insertCell(0);
+            cell.innerHTML = "#" + scoreTankList[i].id + ": " + scoreTankList[i].scr;
+            console.log("score of #" + scoreTankList[i].id + ": " + scoreTankList[i].scr);
+          }
         }
 
         window.addEventListener("resize", resize);
