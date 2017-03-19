@@ -26,6 +26,7 @@
         position: absolute;
         top: 0;
         left: 0;
+        height: 100px;
       }
     </style>
   </head>
@@ -163,16 +164,16 @@
           tank.speed = 0;
           tank.moveTurretAngle = 0;
 
-          if (Game.keys && (Game.keys[39])) {tank.rotTurrRight();}
-          if (Game.keys && (Game.keys[37])) {tank.rotTurrLeft();}
+          if (Game.keys && (Game.keys[39])) { tank.rotTurrRight(); }
+          if (Game.keys && (Game.keys[37])) { tank.rotTurrLeft(); }
 
-          if (Game.keys && (Game.keys[65])) {tank.rotateRight();}
-          if (Game.keys && (Game.keys[68])) {tank.rotateLeft();}
+          if (Game.keys && (Game.keys[65])) { tank.rotateRight(); }
+          if (Game.keys && (Game.keys[68])) { tank.rotateLeft(); }
 
-          if (Game.keys && (Game.keys[87])) {tank.moveForward();}
-          if (Game.keys && (Game.keys[83])) {tank.moveBackward();}
+          if (Game.keys && (Game.keys[87])) { tank.moveForward(); }
+          if (Game.keys && (Game.keys[83])) { tank.moveBackward(); }
 
-          if (Game.keys && (Game.keys[86] || Game.keys[32])) {shot();}
+          if (Game.keys && (Game.keys[86] || Game.keys[32])) { shot(); }
 
           for(var i = 0; i < bulletList.length; i++) {
             drawBullet(bulletList[i].x, bulletList[i].y, bulletList[i].ang);
@@ -184,11 +185,12 @@
             drawTank(tankList[i].id, tankList[i].x, tankList[i].y, tankList[i].ang, tankList[i].tur);
           }
 
+          scores.innerHTML = "";
           for (var i = 0; i < tankList.length; i++) {
-            scores.innerHTML = "";
-            var row = scores.insertRow(0);
+            var row = scores.insertRow(scores.rows.length);
             var cell = row.insertCell(0);
             cell.innerHTML = "#" + tankList[i].id + ": " + tankList[i].scr;
+            console.log("score of #" + tankList[i].id + ": " + tankList[i].scr);
           }
 
           lastFrame = now;
