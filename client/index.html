@@ -66,8 +66,8 @@
                 id: uuid,
                 x: tank.x,
                 y: tank.y,
-                ang: tank.angle / Math.PI * 180,
-                tur: tank.turretAngle / Math.PI * 180
+                ang: tank.angle,
+                tur: tank.turretAngle
               }))
             }, 16);
 
@@ -101,7 +101,7 @@
           switch (data.pckid) {
             case 1:
               uuid = data.id;
-              tank = new Tank(data.x, data.y, 1, 2);
+              tank = new Tank(data.x, data.y, 1, 2, 3);
               Game.start();
               break;
             case 2:
@@ -138,7 +138,7 @@
 
           tank.moveAngle = 0;
           tank.speed = 0;
-
+          tank.moveTurretAngle = 0;
 
           if (Game.keys && (Game.keys[39])) {tank.rotTurrRight();}
           if (Game.keys && (Game.keys[37])) {tank.rotTurrLeft();}
@@ -155,8 +155,6 @@
             drawBullet(bulletList[i].x, bulletList[i].y, bulletList[i].ang);
           }
 
-          console.log(tank.turretAngle);
-
           tank.update(dt);
 
           for(var i = 0;i < tankList.length; i++) {
@@ -168,30 +166,27 @@
           window.requestAnimationFrame(gameLoop);
         }
 
-        function Tank(x, y, topSpeed, topRotSpeed) {
+        function Tank(x, y, bodySpeed, bodyRotSpeed, turRotSpeed) {
           this.x = x;
           this.y = y;
 
           this.speed = 0;
           this.angle = 0;
+          this.turretAngle = 0;
 
           this.moveAngle = 0;
           this.moveTurretAngle = 0;
-          this.topSpeed = topSpeed;
-          this.topRotSpeed = topRotSpeed;
 
-          this.topTurRotSpeed = 4;
-          this.turretAngle = 1;
+          this.topSpeed = bodySpeed;
+          this.topRotSpeed = bodyRotSpeed;
+          this.topTurSpeed = turRotSpeed;
 
           this.update = function(dt) {
-            this.angle += 0.05 * dt * this.moveAngle * Math.PI / 180;
+            this.angle += 0.05 * dt * this.moveAngle; // degrees
+            this.turretAngle += 0.05 * dt * -this.moveTurretAngle;
 
-             //  this.turretAngle = Math.atan2(this.y - cursorY, this.x - cursorX) * 180 / Math.PI;
-
-            this.turretAngle += 0.05 * dt * this.moveTurretAngle * Math.PI / 180;
-
-            this.x += 0.1 * dt * this.speed * Math.sin(this.angle);
-            this.y -= 0.1 * dt * this.speed * Math.cos(this.angle);
+            this.x += 0.1 * dt * this.speed * Math.sin(this.angle * Math.PI  / 180);
+            this.y -= 0.1 * dt * this.speed * Math.cos(this.angle * Math.PI  / 180);
 
             if(this.x >= MAP_WIDTH) {
               this.x = MAP_WIDTH;
@@ -208,11 +203,11 @@
           }
 
           this.rotTurrLeft = function() {
-            this.moveTurretAngle = this.topTurRotSpeed;
+            this.moveTurretAngle = this.topTurSpeed;
           }
 
           this.rotTurrRight = function() {
-            this.moveTurretAngle = - this.topTurRotSpeed;
+            this.moveTurretAngle = -this.topTurSpeed;
           }
 
           this.moveForward = function() {
@@ -261,8 +256,6 @@
           var ratioX = canvas.width/MAP_WIDTH;
           var ratioY = canvas.height/MAP_HEIGHT;
 
-          var radAng = tur * Math.PI / 180
-
           ctx.save();
 
           ctx.translate(canvasX, canvasY);
@@ -274,12 +267,13 @@
             ctx.fillStyle = "red";
           }
           ctx.fillRect(ratioX*(-10), ratioY*(-12), ratioX*(20), ratioY*(24));
+          ctx.restore();
 
-          /*ctx.moveTo(canvasX, canvasY);
-          ctx.lineTo(5* Math.sin(tur),
-                     5* Math.cos(tur));
-          ctx.stroke();*/
-
+          ctx.save();
+          ctx.translate(canvasX, canvasY);
+          ctx.rotate(tur * Math.PI / 180);
+          ctx.fillStyle = "black"
+          ctx.fillRect(ratioX * -4, ratioY * 0, ratioX * 8, ratioY * -30);
           ctx.restore();
         }
 
