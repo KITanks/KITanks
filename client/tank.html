@@ -11,33 +11,40 @@
       }
       #canvas {
         border:1px solid #d3d3d3;
+        background: url("images/ground.jpg") repeat;
       }
       #info {
         position: absolute;
-        left: 0;
-        bottom: 0;
+        left: 10px;
+        bottom: 10px;
         font-size: 20px;
         color: red;
+        font-weight: bold;
+        font-family: monospace;
       }
       #table {
         position: absolute;
-        top: 0;
-        left: 0;
+        top: 10px;
+        left: 10px;
         height: 100px;
+        background-color: rgba(255, 255, 255, .3);
+        border-radius: 10px;
+        width: 100px;
+        height: 200px;
+        padding: 4px;
+        font-size: 18px;
+        font-family: monospace;
+        overflow: hidden;
+        color: rgb(220, 220, 220);
       }
     </style>
   </head>
     <body>
       <canvas id="canvas"></canvas>
       <div id="table">
-      <body background="images/ground.jpg">
-        <table id="scores" border="0">
-          <tr><td>Text 1</td></tr>
-          <tr><td>Text 2</td></tr>
-        </table>
+        <table id="scores" border="0"></table>
       </div>
-      <div id="info"></div>
-
+      <div id="info">
       <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function() {
         var canvas = document.getElementById("canvas");
@@ -50,16 +57,19 @@
         var bulletList = [];
         var MAP_WIDTH = 2000;
         var MAP_HEIGHT = 1000;
+        var scoreList = [];
         var lastFrame = Date.now();
         resize();
         socket.onopen = function() {
           Game.start();
         }
         socket.onerror = function() {
-          setText("Connection error");
+          setText("Connection error!");
+          clear();
         }
         socket.onclose = function() {
-          setText("Connection closed");
+          setText("Connection to server closed!");
+          clear();
         }
         var Game = {
           start: function() {
@@ -92,7 +102,6 @@
         }
         socket.onmessage = function(message) {
           var data = JSON.parse(message.data);
-          //console.log("> " + message.data);
           switch (data.pckid) {
             case 1:
               uuid = data.id;
@@ -134,7 +143,6 @@
           clear();
           var now = Date.now();
           var dt = now - lastFrame;
-          //console.log(dt);
           tank.moveAngle = 0;
           tank.speed = 0;
           tank.moveTurretAngle = 0;
@@ -152,13 +160,7 @@
           for(var i = 0;i < tankList.length; i++) {
             drawTank(tankList[i].id, tankList[i].x, tankList[i].y, tankList[i].ang, tankList[i].tur);
           }
-          scores.innerHTML = "";
-          for (var i = 0; i < tankList.length; i++) {
-            var row = scores.insertRow(scores.rows.length);
-            var cell = row.insertCell(0);
-            cell.innerHTML = "#" + tankList[i].id + ": " + tankList[i].scr;
-            console.log("score of #" + tankList[i].id + ": " + tankList[i].scr);
-          }
+          updateScoreList();
           lastFrame = now;
           window.requestAnimationFrame(gameLoop);
         }
@@ -285,6 +287,19 @@
         function resize() {
           canvas.width = window.innerWidth - 2;
           canvas.height = window.innerWidth / 2;
+        }
+        function updateScoreList() {
+          scoreTankList = tankList;
+          scoreTankList.sort(function(a, b) {
+            return a.score - b.score
+          })
+          scores.innerHTML = "";
+          for (var i = 0; i < scoreTankList.length; i++) {
+            var row = scores.insertRow(scores.rows.length);
+            var cell = row.insertCell(0);
+            cell.innerHTML = "#" + scoreTankList[i].id + ": " + scoreTankList[i].scr;
+            console.log("score of #" + scoreTankList[i].id + ": " + scoreTankList[i].scr);
+          }
         }
         window.addEventListener("resize", resize);
         window.addEventListener('mousemove', function (e) {
