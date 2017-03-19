@@ -28,6 +28,8 @@ function TankHandler(server, client) {
     this.width = 13;
     this.length = 20;
 
+    this.offset = 20;
+
     // time of last bullet
     this.lastBulletShot = 0;
 }
@@ -163,8 +165,10 @@ TankHandler.prototype.spawnBullet = function() {
     if (now - this.lastBulletShot < this.server.config.server_bullet_interval)
         return;
 
-    this.server.spawnBullet(this.x, this.y, this.tur);
+    var bulletX = this.x + this.offset * Math.sin(this.tur * Math.PI / 180);
+    var bulletY = this.y + this.offset * -Math.cos(this.tur * Math.PI / 180);
 
+    this.server.spawnBullet(bulletX, bulletY, this.tur);
     this.lastBulletShot = now;
 }
 
@@ -173,4 +177,9 @@ TankHandler.prototype.spawnBullet = function() {
  */
 TankHandler.prototype.getAddress = function() {
     return this.address;
+}
+
+TankHandler.prototype.respawn = function(pos) {
+    this.x = pos.x;
+    this.y = pos.y;
 }

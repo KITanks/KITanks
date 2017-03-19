@@ -175,7 +175,8 @@ GameServer.prototype.loop = function() {
         this.bullets.forEach(function(bullet) {
             if (this.circleCircleCollision(client.handler.x, client.handler.y, client.handler.width,
                                            bullet.x, bullet.y, bullet.radius)) {
-                console.log("bullet-tank hit");
+                this.removeBullet(bullet.getId());
+                this.respawnTank(client);
             }
         }.bind(this));
     }.bind(this));
@@ -325,4 +326,15 @@ GameServer.prototype.circleCircleCollision = function(x1, y1, r1, x2, y2, r2) {
 
 GameServer.prototype.getDistance = function(x1, y1, x2, y2) {
     return Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2);
+}
+
+GameServer.prototype.respawnTank = function(client) {
+    var pos = this.getRandomPosition();
+    client.handler.respawn(pos);
+
+    client.send(JSON.stringify({
+        pckid: 5,
+        x: pos.x,
+        y: pos.y
+    }));
 }
