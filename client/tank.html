@@ -57,6 +57,7 @@
         var bulletList = [];
         var explosionList = [];
         var mineList = [];
+        var wallList[];
         var MAP_WIDTH = 2000;
         var MAP_HEIGHT = 1000;
         var scoreList = [];
@@ -135,6 +136,9 @@
               console.log("bbbbooom?");
               mineList = data.mines;
               break;
+          /*  case 8:
+              wallList = data.wall;
+              break;*/
             default:
               break;
           }
@@ -183,6 +187,9 @@
               drawExplosion(explosionList[i].x, explosionList[i].y);
             }
           }
+        /*  for(var i = 0;i < wallList.length; i++) {
+            drawWall(wallList[i].x ,wallList[i].y ,wallList[i].width ,wallList[i].height)
+          }*/
           lastFrame = now;
           window.requestAnimationFrame(gameLoop);
         }
@@ -323,6 +330,11 @@
           //  console.log("score of #" + scoreTankList[i].id + ": " + scoreTankList[i].scr);
           }
         }
+        function explosion(x, y) {
+          currentTime = Date.now();
+          explosionList.push({x:x, y:y , date: currentTime});
+          drawExplosion(x ,y);
+        }
         function drawExplosion(x, y) {
           var canvasX = (x / MAP_WIDTH) * canvas.width;
           var canvasY = (y / MAP_HEIGHT) * canvas.height;
@@ -336,11 +348,6 @@
           currentTime = Date.now();
 
           console.log("olle");
-        }
-        function explosion(x, y) {
-          currentTime = Date.now();
-          explosionList.push({x:x, y:y , date: currentTime});
-          drawExplosion(x ,y);
         }
         function mine(x, y) {
           this.x = x;
@@ -364,7 +371,23 @@
             ctx.fillRect(ratioX * -5, ratioY * 5, ratioX * 10, ratioY * -10);
             ctx.restore();
         }
+/*
+        function wall(x, y, widht, heigth) {
+          wallList.push({x:x ,y:y, width:width, height:height})
+        }
+        function drawWall(x, y, widht, heigth) {
+          var canvasX = (x / MAP_WIDTH) * canvas.width;
+          var canvasY = (y / MAP_HEIGHT) * canvas.height;
+          var ratioX = canvas.width/MAP_WIDTH;
+          var ratioY = canvas.height/MAP_HEIGHT;
 
+          ctx.save();
+          ctx.translate(canvasX, canvasY);
+          ctx.fillStyle = "green"
+          ctx.fillRect(ratioX * -(width/2), ratioY * (height / 2), ratioX * width, ratioY * -height);
+          ctx.restore();
+        }
+*/
         window.addEventListener("resize", resize);
         window.addEventListener('mousemove', function (e) {
             cursorX = e.pageX;
